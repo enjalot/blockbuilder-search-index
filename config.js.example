@@ -1,0 +1,7 @@
+// generate application tokens at https://github.com/settings/applications/new
+module.exports = {
+  github: {
+    clientId: 'ASDF',
+    secret: 'ASDFASDF'
+  }
+};
