@@ -22,13 +22,16 @@ getPages = (username, gists, page, cb) ->
   #console.log "getting page #{page} for #{username}"
   gh.getUsersGists username, page, (err, response, body) ->
     newGists = parse(err, body)
+    console.log("ERROR", err) if err
     #console.log "new gists", newGists
     return cb(gists) unless newGists && newGists.length > 0
     newGists.forEach (gist) ->
       # TODO: selectively pull files
       if gist.public && gist.files["index.html"] && !gist.files["_.md"] #cancel out tributary
         gists.push(prune(gist))
-    getPages username, gists, page+1, cb
+    setTimeout ->
+      getPages username, gists, page+1, cb
+    , 100
 
 
 parse = (err, body) ->
@@ -43,10 +46,7 @@ getGistMetaData = ->
   usersString = fs.readFileSync('data/usables.csv').toString()
   users = d3.csv.parse usersString
   allGists = []
-  async.eachLimit users, 10, (user, userCb) ->
-    #getUser user.username, (err, response, body) ->
-    #  u = parse(err, body)
-    #  return userCb() unless u
+  async.eachLimit users, 5, (user, userCb) ->
     getPages user.username, [], 1, (gists) ->
       console.log "done with #{user.username}, found #{gists.length} gists"
       gists.forEach (g) ->
@@ -55,14 +55,44 @@ getGistMetaData = ->
   , (results) ->
     console.log "done"
     console.log "all gists", allGists.length
-    fs.writeFileSync "data/gist-meta.json", JSON.stringify(allGists)
+    newGists = combine allGists
+    fs.writeFileSync "data/gist-meta.json", JSON.stringify(newGists)
     #results.forEach (user) ->
     #  console.log user.login, user.public_gists
 
-getGistMetaData()
+combine = (newGists) ->
+  blocksList = JSON.parse(fs.readFileSync("data/gist-meta.json").toString() || "[]")
+  console.log "loaded #{blocksList.length} existing blocks"
+  blocks = {}
+  blocksList.forEach (block) ->
+    blocks[block.id] = block
+
+  newGists.forEach (gist) ->
+    blocks[gist.id] = gist
+
+  ids = Object.keys(blocks)
+  console.log "now we have #{ids.length} blocks"
+  newBlockList = []
+  ids.forEach (id) ->
+    newBlockList.push blocks[id]
+  console.log "just to be sure #{newBlockList.length}"
+  return newBlockList
+
+
+username = process.argv[2]
+if username
+  console.log "username", username
+  getPages username, [], 1, (gists) ->
+    gists.forEach (g) ->
+      console.log g.id, g.description
+    newGists = combine gists
+    fs.writeFileSync "data/gist-meta.json", JSON.stringify(newGists)
+else
+  getGistMetaData()
 
 ###
-getUsersGists "sxywu", 3, (err, response, body) ->
+gh.getUsersGists "sxywu", 3, (err, response, body) ->
+  #console.log "RESPONSE", response.headers
   gists = parse(err, body)
   console.log "gists", gists?.length
 ###

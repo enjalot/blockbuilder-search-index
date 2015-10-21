@@ -29,8 +29,10 @@ getGist = (gistId, cb) ->
 getUsersGists = (username, page, cb) ->
   count++
   url = "https://api.github.com/users/#{username}/gists?page=#{page}&per_page=100"
-  request.get(ghUrl(url), cb);
-  console.log("request count", count)
+  request.get ghUrl(url), (err, response, body) ->
+    console.log "x-ratelimit-remaining:", response.headers['x-ratelimit-remaining']
+    cb err, response, body
+  #console.log("request count", count)
 
 module.exports = {
   ghUrl, getUser, getGist, getUsersGists, count
