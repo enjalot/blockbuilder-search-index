@@ -18,18 +18,21 @@ blocks = {}
 blocksList.forEach (block) ->
   blocks[block.id] = block
 
-thumbed = []
+gblocks = []
+ids = []
 list.forEach (link) ->
   splitted = link.url.split("/")
   user = splitted[3]
   id = splitted[4]
+  ids.push id
   block = blocks[id]
   if block
     console.log "block", user, id
-    if block.thumbnail
-      thumbed.push block
+    #if block.thumbnail
+    gblocks.push block
   else
     console.log "no block", user, id
 
-console.log "#{thumbed.length} blocks with thumbnails out of #{list.length}"
-fs.writeFileSync "data/gallery.json", JSON.stringify(thumbed)
+console.log "#{gblocks.length} blocks found out of #{list.length}"
+fs.writeFileSync "data/gallery.json", JSON.stringify(gblocks)
+fs.writeFileSync "data/unconfIds.csv", "id\n" + ids.join("\n")

@@ -18,13 +18,57 @@ parse = (code) ->
   }); 
   ###
 
+param = process.argv[2]
+if param
+  if param.indexOf(".csv") > 0
+    # list of ids to parse
+    ids = d3.csv.parse(fs.readFileSync(singleId).toString())
+  else
+    singleId = param
+    console.log "doing meta for single block", singleId
 
 gistMeta = JSON.parse fs.readFileSync('data/gist-meta.json').toString()
 console.log gistMeta.length
 
+
+combine = (newGists) ->
+  blocksList = JSON.parse(fs.readFileSync("data/gist-content.json").toString() || "[]")
+  console.log "loaded #{blocksList.length} existing blocks"
+  blocks = {}
+  blocksList.forEach (block) ->
+    blocks[block.id] = block
+
+  newGists.forEach (gist) ->
+    blocks[gist.id] = gist
+
+  ids = Object.keys(blocks)
+  console.log "now we have #{ids.length} blocks"
+  newBlockList = []
+  ids.forEach (id) ->
+    newBlockList.push blocks[id]
+  console.log "just to be sure #{newBlockList.length}"
+  return newBlockList
+
+
 apiHash = {}
 
-async.eachLimit gistMeta, 100, (gist, gistCb) ->
+
+
+done = () ->
+  console.log "done", apiHash
+  if singleId
+    console.log "single id", singleId
+    return
+  if ids
+    console.log "ids", ids
+    return
+  fs.writeFileSync "data/apis.json", JSON.stringify(apiHash)
+  fs.writeFileSync "data/blocks.json", JSON.stringify(gistMeta)
+
+gistParser = (gist, gistCb) ->
+  return gistCb() if ids && (gist.id not in ids)
+  return gistCb() if singleId && (gist.id != singleId)
+  #console.log "NOT RETURNING", gist.id, singleId
   fileNames = Object.keys gist.files
   gapiHash = {}
   async.each fileNames, (fileName, fileCb) ->
@@ -46,24 +90,12 @@ async.eachLimit gistMeta, 100, (gist, gistCb) ->
       fileCb()
   , () ->
     gist.api = gapiHash
+    #console.log "GAPI HASH", gapiHash
     delete gist.files
     gistCb()
-  ###
-  file = gist.files["index.html"]
-  #console.log "requesting", file.raw_url
-  request.get file.raw_url, (err, response, body) ->
-    #console.log err, response, body?.length
-    apis = parse(body)
-    console.log file.raw_url, apis.length
-    apis.forEach (api) ->
-      api = api.slice(0, api.length-1)
-      apiHash[api] = 0 unless apiHash[api]
-      apiHash[api]++
-    gistCb()
-  ###
-, () ->
-  console.log "done", apiHash
-  fs.writeFileSync "data/apis.json", JSON.stringify(apiHash)
-  fs.writeFileSync "data/blocks.json", JSON.stringify(gistMeta)
+  
 
-
+if singleId or ids
+  async.each gistMeta, gistParser, done
+else
+  async.eachLimit gistMeta, 100, gistParser, done
