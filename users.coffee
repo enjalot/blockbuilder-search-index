@@ -18,7 +18,7 @@ if username
     u = parse(err, body)
     console.log u.login, u.public_gists
 else
-  usersString = fs.readFileSync('data/users.csv').toString()
+  usersString = fs.readFileSync('data/users-combined.csv').toString()
   users = d3.csv.parse usersString
   usables = []
   async.each users, (user, userCb) ->

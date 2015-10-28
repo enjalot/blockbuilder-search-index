@@ -89,7 +89,8 @@ gistParser = (gist, gistCb) ->
     else
       fileCb()
   , () ->
-    gist.api = gapiHash
+    if !gist.api || Object.keys(gapiHash).length > 0
+      gist.api = gapiHash
     #console.log "GAPI HASH", gapiHash
     delete gist.files
     gistCb()
