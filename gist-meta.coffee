@@ -5,6 +5,7 @@ request = require 'request'
 
 gh = require './github'
 
+###
 prune = (gist) ->
   pruned = {
     id: gist.id
@@ -17,6 +18,7 @@ prune = (gist) ->
   if gist.files["thumbnail.png"]
     pruned.thumbnail = gist.files["thumbnail.png"].raw_url
   return pruned
+###
 
 getPages = (username, gists, page, cb) ->
   #console.log "getting page #{page} for #{username}"
@@ -26,9 +28,9 @@ getPages = (username, gists, page, cb) ->
     #console.log "new gists", newGists
     return cb(gists) unless newGists && newGists.length > 0
     newGists.forEach (gist) ->
-      # TODO: selectively pull files
       if gist.public && gist.files["index.html"] && !gist.files["_.md"] #cancel out tributary
-        gists.push(prune(gist))
+        #gists.push(prune(gist))
+        gists.push(gist)
     setTimeout ->
       getPages username, gists, page+1, cb
     , 100
@@ -61,7 +63,10 @@ getGistMetaData = ->
     #  console.log user.login, user.public_gists
 
 combine = (newGists) ->
-  blocksList = JSON.parse(fs.readFileSync("data/gist-meta.json").toString() || "[]")
+  try
+    blocksList = JSON.parse(fs.readFileSync("data/gist-meta.json").toString() || "[]")
+  catch e
+    blocksList = []
   console.log "loaded #{blocksList.length} existing blocks"
   blocks = {}
   blocksList.forEach (block) ->
