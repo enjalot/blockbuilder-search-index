@@ -173,6 +173,8 @@ gistParser = (gist, gistCb) ->
       colorBlocks.push pruneColors(gist)
     #console.log "GAPI HASH", gapiHash
     #delete gist.files
+    if gist.files["thumbnail.png"]
+      gist.thumbnail = gist.files["thumbnail.png"].raw_url
     allBlocks.push gist
     return gistCb()
 
