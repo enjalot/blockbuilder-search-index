@@ -13,7 +13,7 @@ listStr = fs.readFileSync(listFile).toString()
 list = d3.csv.parse listStr
 console.log "list\n", list.length
 
-blocksList = JSON.parse(fs.readFileSync("data/blocks.json").toString() || "[]")
+blocksList = JSON.parse(fs.readFileSync("data/blocks-api.json").toString() || "[]")
 #blocksList = JSON.parse(fs.readFileSync("data/gist-meta.json").toString() || "[]")
 blocks = {}
 blocksList.forEach (block) ->
