@@ -22,6 +22,7 @@ apiBlocks = []
 
 colorHash = {}
 colorBlocks = []
+colorBlocksMin = []
 
 # number of missing files
 missing = 0
@@ -73,6 +74,7 @@ done = (err) ->
   fs.writeFileSync "data/blocks-min.json", JSON.stringify(minBlocks)
   fs.writeFileSync "data/blocks-api.json", JSON.stringify(apiBlocks)
   fs.writeFileSync "data/blocks-colors.json", JSON.stringify(colorBlocks)
+  fs.writeFileSync "data/blocks-colors-min.json", JSON.stringify(colorBlocksMin)
   fs.writeFileSync "data/files-blocks.json", JSON.stringify(fileBlocks)
   console.log "err", err if err
   console.log "wrote #{apiBlocks.length} API blocks"
@@ -125,6 +127,22 @@ pruneColors = (gist) ->
   }
   if gist.files["thumbnail.png"]
     pruned.thumbnail = gist.files["thumbnail.png"].raw_url
+  return pruned
+
+pruneColorsMin = (gist) ->
+  pruned = {
+    i: gist.id
+    u: gist.owner.login 
+    c: Object.keys(gist.colors) || []
+  }
+  th = gist.files["thumbnail.png"]?.raw_url
+  if th
+    split = th.split '/raw/'
+    commit = split[1].split('/thumbnail.png')[0]
+    pruned.t = commit
+
+  #if gist.files["thumbnail.png"]
+  #  pruned.thumbnail = gist.files["thumbnail.png"].raw_url
   return pruned
 
 pruneFiles = (gist) ->
@@ -246,6 +264,7 @@ gistParser = (gist, gistCb) ->
     if Object.keys(gcolorHash).length > 0
       gist.colors = gcolorHash
       colorBlocks.push pruneColors(gist)
+      colorBlocksMin.push pruneColorsMin(gist)
     #console.log "GAPI HASH", gapiHash
     #delete gist.files
     if gist.files["thumbnail.png"]
