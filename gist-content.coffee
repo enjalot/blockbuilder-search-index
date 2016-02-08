@@ -82,7 +82,7 @@ gistFetcher = (gist, gistCb) ->
   return gistCb() if singleId && (gist.id != singleId)
   #console.log "NOT RETURNING", gist.id, singleId
   fileNames = Object.keys gist.files
-  folder = "data/gists/" + gist.id
+  folder = base + gist.id
   fs.mkdir folder, ->
   async.each fileNames, (fileName, fileCb) ->
     ext = path.extname(fileName).toLowerCase()
