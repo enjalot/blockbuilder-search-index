@@ -5,5 +5,9 @@ module.exports = {
     secret: 'ASDFASDF',
     // personal access token for making auth'd clones. don't give this token any permissions, not needed
     token: ''
+  },
+  elasticsearch: {
+    host: 'localhost:9200',
+    log: 'trace'
   }
 };
