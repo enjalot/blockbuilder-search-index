@@ -225,7 +225,7 @@ gistParser = (gist, gistCb) ->
   # per-gist cache of api functions that we build up in place
   gapiHash = {}
   gcolorHash = {}
-  folder = __dirname + "/" + "data/gists/" + gist.id
+  folder = __dirname + "/" + "data/gists-files/" + gist.id
   fs.mkdir folder, ->
 
   # we make a simplified data object for each file
@@ -273,4 +273,8 @@ gistParser = (gist, gistCb) ->
     minBlocks.push pruneMin(gist)
     return gistCb()
 
-async.eachLimit gistMeta, 100, gistParser, done
+
+module.exports = { api: parseApi, colors: parseColors, colorScales }
+
+if require.main == module
+  async.eachLimit gistMeta, 100, gistParser, done
