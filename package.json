@@ -1,0 +1,27 @@
+{
+  "name": "blocka-slurp",
+  "version": "1.0.0",
+  "description": "slurp down blocks",
+  "main": "index.js",
+  "dependencies": {
+    "async": "^1.5.2",
+    "d3": "^3.5.14",
+    "elasticsearch": "^10.1.3",
+    "request": "^2.69.0",
+    "shelljs": "^0.6.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/enjalot/blocka-slurp.git"
+  },
+  "author": "Ian Johnson",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/enjalot/blocka-slurp/issues"
+  },
+  "homepage": "https://github.com/enjalot/blocka-slurp#readme"
+}

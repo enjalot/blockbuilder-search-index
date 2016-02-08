@@ -2,6 +2,8 @@
 module.exports = {
   github: {
     clientId: 'ASDF',
-    secret: 'ASDFASDF'
+    secret: 'ASDFASDF',
+    // personal access token for making auth'd clones. don't give this token any permissions, not needed
+    token: ''
   }
 };

@@ -1,4 +1,6 @@
 config.js
 node_modules/
 data/gists/
+data/gists-clones/
+data/gists-files/
 data/gists.zip

@@ -31,15 +31,14 @@ coffee gist-meta.coffee
 This outputs to `data/gist-meta.json` which can then be used to generate the blocks
 
 ### Parsed blocks
+download gist contents via raw urls, save on disk in `data/gists-files`
 ```
 coffee gist-content.coffee
 ```
-
-This will output to `data/blocks.json` with the count of each api function used added to the gist metadata, as well as the file metadata stripped away to save space.  
-This works by iterating through all the blocks in `data/gist-meta.json` and downloading the raw html/js files and parsing out d3 functions from them.
-
-I'm considering having this save all the pulled down files to disk for further processing.
-
+run through the files in `data/gists-files` and extract interesting data into `data/blocks.json` (and many more blocks-*.json files)
+```
+coffee parse.coffee
+```
 
 ### Custom gallery JSON
 
