@@ -39,7 +39,7 @@ getPages = (userName, gists, page, since, cb) ->
 # using the "since" date. If no date is specified it gets the blocks since the
 # start of time
 getGistMetaData = ->
-  usersString = fs.readFileSync('data/usables.csv').toString()
+  usersString = fs.readFileSync(__dirname + '/data/usables.csv').toString()
   users = d3.csv.parse usersString
   allGists = []
   async.eachLimit users, 5, (user, userCb) ->
