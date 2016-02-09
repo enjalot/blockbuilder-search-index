@@ -130,5 +130,6 @@ gistParser = (gist, gistCb) ->
     , (err, response) ->
       console.log "indexed", gist.id
       return gistCb()
+      process.exit()
 
 async.eachLimit gistMeta, 100, gistParser, done
