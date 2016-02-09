@@ -42,18 +42,18 @@ done = (err, pruned) ->
     console.log "ids", ids
     return
   # log to elastic search
-    summary = 
-      script: "content"
-      timeouts: timeouts
-      filename: metaFile
-      ranAt: new Date()
-    client.index
-      index: 'bbindexer'
-      type: 'scripts'
-      body: summary
-    , (err, response) ->
-      console.log "indexed"
-      process.exit()
+  summary = 
+    script: "content"
+    timeouts: timeouts
+    filename: metaFile
+    ranAt: new Date()
+  client.index
+    index: 'bbindexer'
+    type: 'scripts'
+    body: summary
+  , (err, response) ->
+    console.log "indexed"
+    process.exit()
 
 gistCloner = (gist, gistCb) ->
   # I wanted to actually clone all the repositories but it seems to be less reliable.
