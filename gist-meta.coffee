@@ -66,6 +66,7 @@ getGistMetaData = ->
       body: summary
     , (err, response) ->
       console.log "indexed"
+      process.exit()
 
 # this function combines the new gist meta-data with what we may have already
 # gotten before. This allows us to accumulate new blocks incrementally
