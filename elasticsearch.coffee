@@ -11,6 +11,14 @@ elasticsearch = require('elasticsearch')
 esConfig = require('./config.js').elasticsearch
 client = new elasticsearch.Client esConfig
 
+
+# specify the file to load, will probably be data/latest.json for our cron job
+metaFile = process.argv[2] || 'data/gist-meta.json'
+
+# read in the list of gist metadata
+gistMeta = JSON.parse fs.readFileSync(metaFile).toString()
+console.log gistMeta.length, "gists"
+
 # number of missing files
 missing = 0
 
@@ -19,9 +27,6 @@ done = (err) ->
   console.log "skipped #{missing} missing files"
   console.log "err", err if err
   
-# read in the list of gist metadata
-gistMeta = JSON.parse fs.readFileSync('data/gist-meta.json').toString()
-console.log gistMeta.length, "gists"
 
 pruneES = (gist) ->
   # the JSON we will be sending to elasticsearch
@@ -42,7 +47,7 @@ pruneES = (gist) ->
     split = thumb.split '/raw/'
     commit = split[1].split('/thumbnail.png')[0]
     pruned.thumb = commit
-  preview = gist.files["thumbnail.png"]?.raw_url
+  preview = gist.files["preview.png"]?.raw_url
   if gist.files["preview.png"]
     split = preview.split '/raw/'
     commit = split[1].split('/preview.png')[0]

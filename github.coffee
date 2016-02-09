@@ -26,11 +26,13 @@ getGist = (gistId, cb) ->
   url = "https://api.github.com/gists/" + gistId
   request.get(ghUrl(url), cb);
 
-getUsersGists = (username, page, cb) ->
+getUsersGists = (username, page, since, cb) ->
   count++
-  since = ""
-  #since = "&since=2015-10-01T00:00:00Z"
-  url = "https://api.github.com/users/#{username}/gists?page=#{page}&per_page=100" + since
+  if since
+    qsince = "&since=" + since
+  else
+    qsince = ""
+  url = "https://api.github.com/users/#{username}/gists?page=#{page}&per_page=100" + qsince
   request.get ghUrl(url), (err, response, body) ->
     console.log "x-ratelimit-remaining:", response.headers['x-ratelimit-remaining']
     cb err, response, body

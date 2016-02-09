@@ -6,15 +6,17 @@ path = require 'path'
 shell = require 'shelljs'
 
 
-skipExisting = true
-#skipExisting = false
-  
 #base = __dirname + "/data/gists-clones/"
 base = __dirname + "/data/gists-files/"
+fs.mkdir base, ->
 
-fs.mkdir base, -> # "data/gists", ->
+# specify the file to load, will probably be data/latest.json for our cron job
+metaFile = process.argv[2] || 'data/gist-meta.json'
+# skip existing files (faster for huge dump, but we want to update latest files)
+skipExisting = process.argv[3] == "skip" ? true : false
 
-param = process.argv[2]
+# optionally pass in a csv file or a single id to be downloaded
+param = process.argv[3]
 if param
   if param.indexOf(".csv") > 0
     # list of ids to parse
@@ -23,7 +25,8 @@ if param
     singleId = param
     console.log "doing content for single block", singleId
 
-gistMeta = JSON.parse fs.readFileSync('data/gist-meta.json').toString()
+
+gistMeta = JSON.parse fs.readFileSync(metaFile).toString()
 console.log gistMeta.length
 
 timeouts = []
@@ -38,6 +41,18 @@ done = (err, pruned) ->
   if ids
     console.log "ids", ids
     return
+  # log to elastic search
+    summary = 
+      script: "content"
+      timeouts: timeouts
+      filename: metaFile
+      ranAt: new Date()
+    client.index
+      index: 'bbindexer'
+      type: 'scripts'
+      body: summary
+    , (err, response) ->
+      console.log "indexed"
 
 gistCloner = (gist, gistCb) ->
   # I wanted to actually clone all the repositories but it seems to be less reliable.
@@ -99,7 +114,10 @@ gistFetcher = (gist, gistCb) ->
       file = gist.files[fileName]
       request.get file.raw_url, (err, response, body) ->
         #console.log err, response, body?.length
-        console.log filePath, err if err
+        if err
+          console.log "timeout", gist.id
+          timeouts.push gist.id
+          console.log filePath, err
         return fileCb() unless body
         #console.log "writing body", body
         fs.writeFile filePath, body, ->
