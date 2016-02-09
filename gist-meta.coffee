@@ -106,7 +106,7 @@ parse = (err, body) ->
 
 if singleUsername
   console.log "username", singleUsername
-  getPages username, [], 1, since, (gists) ->
+  getPages singleUsername, [], 1, since, (gists) ->
     gists.forEach (g) ->
       console.log g.id, g.description
     newGists = combine gists
