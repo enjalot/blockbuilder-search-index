@@ -9,8 +9,9 @@ gh = require './github'
 filename = process.argv[2] || "data/gist-meta.json"
 since = process.argv[3] || ""  # "2015-10-01T00:00:00Z"
 if since == "15min"
-  since = moment().subtract(15, "minutes").format()#.format("YYYY-MM-DDTHH:mm:ssZ")
-  console.log "SINCE", since
+  since = moment().subtract(15, "minutes")
+  .utc()
+    .format("YYYY-MM-DDTHH:mm:ss[Z]")
 singleUsername = process.argv[4]
 
 # we will log our progress in ES
