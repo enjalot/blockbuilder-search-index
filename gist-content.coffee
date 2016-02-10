@@ -15,6 +15,11 @@ metaFile = process.argv[2] || 'data/gist-meta.json'
 # skip existing files (faster for huge dump, but we want to update latest files)
 skipExisting = process.argv[3] == "skip" ? true : false
 
+# we will log our progress in ES
+elasticsearch = require('elasticsearch')
+esConfig = require('./config.js').elasticsearch
+client = new elasticsearch.Client esConfig
+
 # optionally pass in a csv file or a single id to be downloaded
 param = process.argv[3]
 if param
