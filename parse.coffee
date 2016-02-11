@@ -27,7 +27,7 @@ colorBlocksMin = []
 # number of missing files
 missing = 0
 
-colorNames = d3.csv.parse(fs.readFileSync('data/colors.csv').toString())
+colorNames = d3.csv.parse(fs.readFileSync(__dirname + '/data/colors.csv').toString())
 
 categoryColors = {
   "d3.scale.category10": [

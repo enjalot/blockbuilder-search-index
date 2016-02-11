@@ -72,7 +72,7 @@ getGistMetaData = ->
 # this function combines the new gist meta-data with what we may have already
 # gotten before. This allows us to accumulate new blocks incrementally
 combine = (newGists) ->
-  if filename == "data/latest.json"
+  if filename.indexOf("data/latest.json") >= 0
     # for latest gists we don't want to accumulate from multiple runs
     blocksList = []
   else
