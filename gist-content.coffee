@@ -32,7 +32,7 @@ if param
 
 
 gistMeta = JSON.parse fs.readFileSync(metaFile).toString()
-console.log "number of files" gistMeta.length
+console.log "number of gists", gistMeta.length
 
 timeouts = []
 
