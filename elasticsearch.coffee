@@ -13,7 +13,7 @@ client = new elasticsearch.Client esConfig
 
 
 # specify the file to load, will probably be data/latest.json for our cron job
-metaFile = process.argv[2] || 'data/gist-meta.json'
+metaFile = process.argv[2] || __dirname + '/data/gist-meta.json'
 
 # read in the list of gist metadata
 gistMeta = JSON.parse fs.readFileSync(metaFile).toString()
