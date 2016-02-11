@@ -26,6 +26,7 @@ done = (err) ->
   console.log "done"
   console.log "skipped #{missing} missing files"
   console.log "err", err if err
+  process.exit()
   
 
 pruneES = (gist) ->
@@ -130,6 +131,5 @@ gistParser = (gist, gistCb) ->
     , (err, response) ->
       console.log "indexed", gist.id
       return gistCb()
-      process.exit()
 
 async.eachLimit gistMeta, 100, gistParser, done
