@@ -15,22 +15,21 @@ app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.post('/index/gist', function(req, res) {
-  console.log("hey", req.body)
+  res.status(200).send("Ok"); // we always send OK, this shouldn't interupt app
   var gist = req.body;
-  console.log("GIST", gist)
-  res.status(200).send("Ok");
+  if(!gist) return;
   content.gistFetcher(gist, function(err) {
     es.gistParser(gist, function(err) {
-      console.log("indexed", gist.id)
+      return;
     })
   })
 });
 
 app.get('/delete/gist/:gistId', function(req, res) {
-  res.status(200).send("Ok");
+  res.status(200).send("Ok"); // we always send OK, this shouldn't interupt app
   var gistId = req.params.gistId
   es.deleteGist(gistId, function(err) {
-    console.log("deleted", gistId)
+    return;
   })
 });
 
