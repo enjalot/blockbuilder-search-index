@@ -24,7 +24,7 @@ done = (err, pruned) ->
     console.log "ids", ids
     return
   # log to elastic search
-  summary = 
+  summary =
     script: "content"
     timeouts: timeouts
     filename: metaFile
@@ -53,7 +53,7 @@ gistCloner = (gist, gistCb) ->
   #shell.exec 'git clone git@gist.github.com:' + gist.id, (code, huh, message) ->
     fs.lstat folder + "/.git", (err, stats) ->
       if err
-        #console.log "err", err 
+        #console.log "err", err
         # github timed out
         console.log "timeout", gist.id
         timeouts.push gist.id
@@ -110,12 +110,12 @@ gistFetcher = (gist, gistCb) ->
       fileCb()
   , () ->
     gistCb()
-  
+
 
 module.exports =
   gistFetcher: gistFetcher
   gistCloner: gistCloner
-    
+
 if require.main == module
   #base = __dirname + "/data/gists-clones/"
   base = __dirname + "/data/gists-files/"
@@ -127,7 +127,7 @@ if require.main == module
   skipExisting = process.argv[3] == "skip" ? true : false
 
   # optionally pass in a csv file or a single id to be downloaded
-  param = process.argv[3]
+  param = process.argv[4]
   if param
     if param.indexOf(".csv") > 0
       # list of ids to parse
