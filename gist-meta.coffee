@@ -105,13 +105,14 @@ parse = (err, body) ->
   catch e
     return null
 
-if singleUsername
-  console.log "username", singleUsername
-  getPages singleUsername, [], 1, since, (gists) ->
-    gists.forEach (g) ->
-      console.log g.id, g.description
-    newGists = combine gists
-    fs.writeFileSync filename, JSON.stringify(newGists)
-else
-  getGistMetaData()
+if require.main == module
+  if singleUsername
+    console.log "username", singleUsername
+    getPages singleUsername, [], 1, since, (gists) ->
+      gists.forEach (g) ->
+        console.log g.id, g.description
+      newGists = combine gists
+      fs.writeFileSync filename, JSON.stringify(newGists)
+  else
+    getGistMetaData()
 

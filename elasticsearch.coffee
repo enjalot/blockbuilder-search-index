@@ -9,15 +9,7 @@ parse = require './parse.coffee'
 
 elasticsearch = require('elasticsearch')
 esConfig = require('./config.js').elasticsearch
-client = new elasticsearch.Client esConfig
-
-
-# specify the file to load, will probably be data/latest.json for our cron job
-metaFile = process.argv[2] || __dirname + '/data/gist-meta.json'
-
-# read in the list of gist metadata
-gistMeta = JSON.parse fs.readFileSync(metaFile).toString()
-console.log gistMeta.length, "gists"
+client = new elasticsearch.Client {host: esConfig.host, log: 'trace'}
 
 # number of missing files
 missing = 0
@@ -27,13 +19,13 @@ done = (err) ->
   console.log "skipped #{missing} missing files"
   console.log "err", err if err
   process.exit()
-  
+
 
 pruneES = (gist) ->
 
   # the JSON we will be sending to elasticsearch
   pruned = {
-    userId: gist.owner.login 
+    userId: gist.owner.login
     description: gist.description
     created_at: gist.created_at
     updated_at: gist.updated_at
@@ -42,7 +34,7 @@ pruneES = (gist) ->
     #tags: gist.tags || []
     readme: gist.readme || ""
     filenames: Object.keys(gist.files)
-    #files: 
+    #files:
   }
 
   thumb = gist.files["thumbnail.png"]?.raw_url
@@ -68,7 +60,6 @@ gistParser = (gist, gistCb) ->
   gapiHash = {}
   gcolorHash = {}
   folder = __dirname + "/" + "data/gists-files/" + gist.id
-  fs.mkdir folder, ->
 
   async.each fileNames, (fileName, fileCb) ->
     ext = path.extname(fileName).toLowerCase()
@@ -93,7 +84,7 @@ gistParser = (gist, gistCb) ->
           hashtag = /^#[a-zA-Z].?[\s\,]/g;
           tags = contents.match(hashtag)
           if tags && tags.length
-            console.log gist.id, "tags", tags 
+            console.log gist.id, "tags", tags
             gist.tags = tags
           ###
           # TODO: pull out user @-mentions
@@ -105,10 +96,10 @@ gistParser = (gist, gistCb) ->
           numColors = parse.colors contents, gist, gcolorHash
           #console.log gist.id, fileName, 0, numColors
           return fileCb()
-        else 
+        else
           #console.log gist.id, fileName
           return fileCb()
-    else    
+    else
       return fileCb()
   , () ->
     if Object.keys(gapiHash).length > 0
@@ -133,6 +124,28 @@ gistParser = (gist, gistCb) ->
       body: es
     , (err, response) ->
       console.log "indexed", gist.id
-      return gistCb()
+      return gistCb(err, response)
 
-async.eachLimit gistMeta, 100, gistParser, done
+deleteGist = (gistId, gistCb) ->
+  client.delete
+    index: 'blockbuilder'
+    type: 'blocks'
+    id: gistId
+  , (err, response) ->
+    console.log "deleted", gistId
+    return gistCb(err, response)
+
+module.exports =
+  gistParser: gistParser
+  deleteGist: deleteGist
+  prune: pruneES
+
+if require.main == module
+  # specify the file to load, will probably be data/latest.json for our cron job
+  metaFile = process.argv[2] || __dirname + '/data/gist-meta.json'
+
+  # read in the list of gist metadata
+  gistMeta = JSON.parse fs.readFileSync(metaFile).toString()
+  console.log gistMeta.length, "gists"
+
+  async.eachLimit gistMeta, 100, gistParser, done

@@ -5,34 +5,11 @@ request = require 'request'
 path = require 'path'
 shell = require 'shelljs'
 
-
-#base = __dirname + "/data/gists-clones/"
-base = __dirname + "/data/gists-files/"
-fs.mkdir base, ->
-
-# specify the file to load, will probably be data/latest.json for our cron job
-metaFile = process.argv[2] || 'data/gist-meta.json'
-# skip existing files (faster for huge dump, but we want to update latest files)
-skipExisting = process.argv[3] == "skip" ? true : false
-
 # we will log our progress in ES
 elasticsearch = require('elasticsearch')
 esConfig = require('./config.js').elasticsearch
 client = new elasticsearch.Client esConfig
 
-# optionally pass in a csv file or a single id to be downloaded
-param = process.argv[3]
-if param
-  if param.indexOf(".csv") > 0
-    # list of ids to parse
-    ids = d3.csv.parse(fs.readFileSync(singleId).toString())
-  else
-    singleId = param
-    console.log "doing content for single block", singleId
-
-
-gistMeta = JSON.parse fs.readFileSync(metaFile).toString()
-console.log "number of gists", gistMeta.length
 
 timeouts = []
 
@@ -135,9 +112,35 @@ gistFetcher = (gist, gistCb) ->
     gistCb()
   
 
-if singleId or ids
-  async.each gistMeta, gistFetcher, done
-  #async.each gistMeta, gistCloner, done
-else
-  async.eachLimit gistMeta, 100, gistFetcher, done
-  #async.eachLimit gistMeta, 10, gistCloner, done
+module.exports =
+  gistFetcher: gistFetcher
+  gistCloner: gistCloner
+    
+if require.main == module
+  #base = __dirname + "/data/gists-clones/"
+  base = __dirname + "/data/gists-files/"
+  fs.mkdir base, ->
+
+  # specify the file to load, will probably be data/latest.json for our cron job
+  metaFile = process.argv[2] || 'data/gist-meta.json'
+  # skip existing files (faster for huge dump, but we want to update latest files)
+  skipExisting = process.argv[3] == "skip" ? true : false
+
+  # optionally pass in a csv file or a single id to be downloaded
+  param = process.argv[3]
+  if param
+    if param.indexOf(".csv") > 0
+      # list of ids to parse
+      ids = d3.csv.parse(fs.readFileSync(singleId).toString())
+    else
+      singleId = param
+      console.log "doing content for single block", singleId
+
+  gistMeta = JSON.parse fs.readFileSync(metaFile).toString()
+  console.log "number of gists", gistMeta.length
+  if singleId or ids
+    async.each gistMeta, gistFetcher, done
+    #async.each gistMeta, gistCloner, done
+  else
+    async.eachLimit gistMeta, 100, gistFetcher, done
+    #async.eachLimit gistMeta, 10, gistCloner, done
