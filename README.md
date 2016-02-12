@@ -5,7 +5,7 @@ of public blocks. It powers [Blockbuilder](http://blockbuilder.org)'s [search pa
 [Blocks](https://bl.ocks.org) are stored as GitHub [gists](https://gist.github.com), which are essentially mini git repositories.
 Given a list of users we can query the [GitHub API](https://developer.github.com/v3/gists/) for the latest public gists each of those users has updated or created.
 We can then filter those gists to just those which have an `index.html` file (the main prerequisite for a block to be rendered). Once we have a list of gists
-from the API we can download their files to disk for further processing. The main thrust here is to index some of those files in ElasticSearch so we can provide
+from the API we can download their files to disk for further processing. The main thrust here is to index some of those files in Elasticsearch so we can provide
 a search engine over them.
 
 We also have a script that will output several json files that can be used to make visualizations such as [all the blocks](http://bl.ocks.org/enjalot/1d679f0322174b65d032).
@@ -14,7 +14,7 @@ We also have a script that will output several json files that can be used to ma
 
 ### Config.js
 You will need to create `config.js` before running any of the below commands, you can copy `config.js.example` and replace the placeholders with [application tokens](https://github.com/settings/applications/new). This token is important because otherwise you will quickly run into rate limits from the GitHub API running the below scripts.
-This is also where you will configure ElasticSearch and the RPC server if you are running them.
+This is also where you will configure Elasticsearch and the RPC server if you are running them.
 
 ## Scraping
 
@@ -76,9 +76,9 @@ I wanted a script that would take in a list of block URLS and give me a subset o
 coffee gallery.coffee data/unconf.csv data/out.json
 ```
 
-## ElasticSearch
+## Elasticsearch
 
-Once you have a list of gists (either `data/gist-meta.json`, `data/latest.json` or otherwise) and you've downloaded the content to `data/gist-files/` you can index the gists to ElasticSearch:
+Once you have a list of gists (either `data/gist-meta.json`, `data/latest.json` or otherwise) and you've downloaded the content to `data/gist-files/` you can index the gists to Elasticsearch:
 ```
 coffee elasticsearch.coffee
 # index from a specific file
@@ -92,7 +92,135 @@ This is used to keep the index immediately up-to-date when a user saves or forks
 Currently the save/fork functionality will index if it sees that the gist is public, and it will delete if it sees that the gist is private. This way if you make a previously public gist private
 and updated it via blockbuilder it will be removed from the search index.
 
-I deploy it to the same server as ElasticSearch, and have security groups setup so that its not publicly accessible (only my blockbuilder server can access it)
+I deploy it to the same server as Elasticsearch, and have security groups setup so that its not publicly accessible (only my blockbuilder server can access it)
 ```
 node server.js
+```
+
+### Mappings
+The mappings used for elasticsearch are found below. I've been using the Sense app frome elasticsearch to configure and test my setup both locally and deployed. The default url for sense is `http://localhost:5601/app/sense`.
+
+The `/blockbuilder` index is where all the blocks go, the `/bbindexer` index is where I log the results of each script run (`gist-meta.coffee` and `gist-content.coffee`) which is helpful
+for keeping up with the status of the cron jobs.
+
+```
+DELETE /blockbuilder
+
+PUT /blockbuilder
+{
+  "mappings": {
+    "blocks": {
+      "properties": {
+        "userId": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "created_at": {
+          "type": "date"
+        },
+        "updated_at": {
+          "type": "date"
+        },
+        "api": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "colors": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "filenames": {
+          "type": "string",
+          "index": "not_analyzed"
+        }
+      }
+    }
+  }
+}
+
+GET /blockbuilder/blocks/_search
+{
+  "query": {
+    "match": {
+      "description": "dance"
+    }
+  }
+}
+
+GET /blockbuilder/blocks/_search
+{
+  "aggs": {
+    "all_api": {
+      "terms": { "field": "api" }
+    }
+  }
+}
+
+GET /blockbuilder/blocks/_search
+{
+  "aggs": {
+    "all_colors": {
+      "terms": { "field": "colors" }
+    }
+  }
+}
+
+GET /blockbuilder/blocks/_search
+{
+  "aggs": {
+    "all_colors": {
+      "terms": { "field": "filenames" }
+    }
+  }
+}
+
+GET /blockbuilder/blocks/_search
+{
+  "query": {
+    "match_all": {}
+  },
+  "sort": { "updated_at":{ "order": "desc" }}
+}
+
+DELETE /bbindexer
+
+PUT /bbindexer
+{
+  "mappings": {
+    "blocks": {
+      "properties": {
+        "script": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "filename": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "since": {
+          "type": "date"
+        },
+        "ranAt": {
+          "type": "date"
+        }
+      }
+    }
+  }
+}
+
+GET /bbindexer/scripts/_search
+{
+  "query": {
+    "match_all": {}
+  },
+  "sort": { "ranAt":{ "order": "desc" }}
+}
+
+GET /bbindexer/scripts/_search
+{
+  "query": {
+    "match": { "script": "meta"}
+  },
+  "sort": { "ranAt":{ "order": "desc" }}
+}
 ```
