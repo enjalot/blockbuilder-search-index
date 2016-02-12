@@ -30,6 +30,7 @@ done = (err) ->
   
 
 pruneES = (gist) ->
+
   # the JSON we will be sending to elasticsearch
   pruned = {
     userId: gist.owner.login 
@@ -40,6 +41,8 @@ pruneES = (gist) ->
     colors: Object.keys(gist.colors || {})
     #tags: gist.tags || []
     readme: gist.readme || ""
+    filenames: Object.keys(gist.files)
+    #files: 
   }
 
   thumb = gist.files["thumbnail.png"]?.raw_url
