@@ -32,9 +32,10 @@ pruneES = (gist) ->
     api: Object.keys(gist.api || {})
     colors: Object.keys(gist.colors || {})
     #tags: gist.tags || []
-    readme: gist.readme || ""
-    filenames: Object.keys(gist.files)
     #files:
+    readme: gist.readme || ""
+    code: gist.code || ""
+    filenames: Object.keys(gist.files)
   }
 
   thumb = gist.files["thumbnail.png"]?.raw_url
@@ -110,8 +111,18 @@ gistParser = (gist, gistCb) ->
 
     if gist.files["thumbnail.png"]
       gist.thumbnail = gist.files["thumbnail.png"].raw_url
+    if gist.files["preview.png"]
+      gist.thumbnail = gist.files["thumbnail.png"].raw_url
+
+    # TODO make this more robust
     if gist.files["README.md"]
       gist.readme = gist.files["README.md"].content
+    if gist.files["readme.md"]
+      gist.readme = gist.files["readme.md"].content
+
+    # for now we will just index
+    if gist.files["index.html"]
+      gist.code = gist.files["index.html"].content
 
     es = pruneES(gist)
     #console.log "ES", JSON.stringify(es)
