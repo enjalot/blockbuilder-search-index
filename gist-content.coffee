@@ -142,5 +142,5 @@ if require.main == module
     async.each gistMeta, gistFetcher, done
     #async.each gistMeta, gistCloner, done
   else
-    async.eachLimit gistMeta, 100, gistFetcher, done
+    async.eachLimit gistMeta, 50, gistFetcher, done
     #async.eachLimit gistMeta, 10, gistCloner, done
