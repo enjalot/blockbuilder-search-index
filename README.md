@@ -85,7 +85,7 @@ coffee elasticsearch.coffee
 coffee elasticsearch.coffee data/latest.json
 ```
 
-I deploy this on a server with cronjobs, see the [example crontab]()
+I deploy this on a server with cronjobs, see the [example crontab](https://github.com/enjalot/blockbuilder-search-index/blob/master/deploy/crontab)
 
 ### RPC host
 
@@ -98,6 +98,7 @@ I deploy it to the same server as Elasticsearch, and have security groups setup 
 ```
 node server.js
 ```
+The server is deployed with this [startup script](https://github.com/enjalot/blockbuilder-search-index/blob/master/deploy/blockbuilder-search-index.conf)
 
 
 ### Mappings
