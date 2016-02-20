@@ -159,4 +159,4 @@ if require.main == module
   gistMeta = JSON.parse fs.readFileSync(metaFile).toString()
   console.log gistMeta.length, "gists"
 
-  async.eachLimit gistMeta, 100, gistParser, done
+  async.eachLimit gistMeta, 50, gistParser, done

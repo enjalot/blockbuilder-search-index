@@ -85,6 +85,8 @@ coffee elasticsearch.coffee
 coffee elasticsearch.coffee data/latest.json
 ```
 
+I deploy this on a server with cronjobs, see the [example crontab]()
+
 ### RPC host
 
 I made a very simple REST server that will listen for incoming gists to index them, or an id of a gist to delete from the index.
@@ -97,130 +99,9 @@ I deploy it to the same server as Elasticsearch, and have security groups setup 
 node server.js
 ```
 
+
 ### Mappings
-The mappings used for elasticsearch are found below. I've been using the Sense app frome elasticsearch to configure and test my setup both locally and deployed. The default url for sense is `http://localhost:5601/app/sense`.
+The mappings used for elasticsearch can be found [here](https://gist.github.com/enjalot/a8fb0e18c960a37d1d18). I've been using the Sense app frome elasticsearch to configure and test my setup both locally and deployed. The default url for sense is `http://localhost:5601/app/sense`.
 
 The `/blockbuilder` index is where all the blocks go, the `/bbindexer` index is where I log the results of each script run (`gist-meta.coffee` and `gist-content.coffee`) which is helpful
 for keeping up with the status of the cron jobs.
-
-```
-DELETE /blockbuilder
-
-PUT /blockbuilder
-{
-  "mappings": {
-    "blocks": {
-      "properties": {
-        "userId": {
-          "type": "string",
-          "index": "not_analyzed"
-        },
-        "created_at": {
-          "type": "date"
-        },
-        "updated_at": {
-          "type": "date"
-        },
-        "api": {
-          "type": "string",
-          "index": "not_analyzed"
-        },
-        "colors": {
-          "type": "string",
-          "index": "not_analyzed"
-        },
-        "filenames": {
-          "type": "string",
-          "index": "not_analyzed"
-        }
-      }
-    }
-  }
-}
-
-GET /blockbuilder/blocks/_search
-{
-  "query": {
-    "match": {
-      "description": "dance"
-    }
-  }
-}
-
-GET /blockbuilder/blocks/_search
-{
-  "aggs": {
-    "all_api": {
-      "terms": { "field": "api" }
-    }
-  }
-}
-
-GET /blockbuilder/blocks/_search
-{
-  "aggs": {
-    "all_colors": {
-      "terms": { "field": "colors" }
-    }
-  }
-}
-
-GET /blockbuilder/blocks/_search
-{
-  "aggs": {
-    "all_colors": {
-      "terms": { "field": "filenames" }
-    }
-  }
-}
-
-GET /blockbuilder/blocks/_search
-{
-  "query": {
-    "match_all": {}
-  },
-  "sort": { "updated_at":{ "order": "desc" }}
-}
-
-DELETE /bbindexer
-
-PUT /bbindexer
-{
-  "mappings": {
-    "blocks": {
-      "properties": {
-        "script": {
-          "type": "string",
-          "index": "not_analyzed"
-        },
-        "filename": {
-          "type": "string",
-          "index": "not_analyzed"
-        },
-        "since": {
-          "type": "date"
-        },
-        "ranAt": {
-          "type": "date"
-        }
-      }
-    }
-  }
-}
-
-GET /bbindexer/scripts/_search
-{
-  "query": {
-    "match_all": {}
-  },
-  "sort": { "ranAt":{ "order": "desc" }}
-}
-
-GET /bbindexer/scripts/_search
-{
-  "query": {
-    "match": { "script": "meta"}
-  },
-  "sort": { "ranAt":{ "order": "desc" }}
-}
-```
