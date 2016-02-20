@@ -11,6 +11,7 @@ esConfig = require('./config.js').elasticsearch
 client = new elasticsearch.Client esConfig
 
 
+base = __dirname + "/data/gists-files/"
 timeouts = []
 
 done = (err, pruned) ->
@@ -118,7 +119,6 @@ module.exports =
 
 if require.main == module
   #base = __dirname + "/data/gists-clones/"
-  base = __dirname + "/data/gists-files/"
   fs.mkdir base, ->
 
   # specify the file to load, will probably be data/latest.json for our cron job

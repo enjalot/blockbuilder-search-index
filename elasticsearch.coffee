@@ -112,7 +112,7 @@ gistParser = (gist, gistCb) ->
     if gist.files["thumbnail.png"]
       gist.thumbnail = gist.files["thumbnail.png"].raw_url
     if gist.files["preview.png"]
-      gist.thumbnail = gist.files["thumbnail.png"].raw_url
+      gist.thumbnail = gist.files["preview.png"].raw_url
 
     # TODO make this more robust
     if gist.files["README.md"]
