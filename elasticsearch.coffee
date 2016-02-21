@@ -9,7 +9,10 @@ parse = require './parse.coffee'
 
 elasticsearch = require('elasticsearch')
 esConfig = require('./config.js').elasticsearch
-client = new elasticsearch.Client {host: esConfig.host, log: 'trace'}
+client = new elasticsearch.Client {
+  host: esConfig.host,
+  log: 'trace'
+}
 
 # number of missing files
 missing = 0
@@ -136,7 +139,7 @@ gistParser = (gist, gistCb) ->
         index: 'blockbuilder'
         type: 'blocks'
         id: gist.id
-      , (err, response) ->
+      , (err) ->
         if err
           # post to elastic search, we don't have it indexed yet
           client.index
@@ -144,9 +147,9 @@ gistParser = (gist, gistCb) ->
             type: 'blocks'
             id: gist.id
             body: es
-          , (err, response) ->
+          , (err) ->
             console.log "indexed", gist.id
-            return gistCb(err, response)
+            return gistCb(err)
         else
           return gistCb()
     else
@@ -156,9 +159,9 @@ gistParser = (gist, gistCb) ->
         type: 'blocks'
         id: gist.id
         body: es
-      , (err, response) ->
+      , (err) ->
         console.log "indexed", gist.id
-        return gistCb(err, response)
+        return gistCb(err)
 
 deleteGist = (gistId, gistCb) ->
   client.delete
@@ -183,4 +186,4 @@ if require.main == module
   gistMeta = JSON.parse fs.readFileSync(metaFile).toString()
   console.log gistMeta.length, "gists"
 
-  async.eachLimit gistMeta, 50, gistParser, done
+  async.eachLimit gistMeta, 20, gistParser, done
