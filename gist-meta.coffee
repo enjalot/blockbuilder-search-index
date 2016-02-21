@@ -12,6 +12,10 @@ if since == "15min"
   since = moment().subtract(15, "minutes")
   .utc()
     .format("YYYY-MM-DDTHH:mm:ss[Z]")
+if since == "20min"
+  since = moment().subtract(20, "minutes")
+  .utc()
+    .format("YYYY-MM-DDTHH:mm:ss[Z]")
 singleUsername = process.argv[4]
 
 # we will log our progress in ES
