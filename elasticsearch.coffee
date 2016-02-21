@@ -151,7 +151,9 @@ gistParser = (gist, gistCb) ->
             console.log "indexed", gist.id
             return gistCb(err)
         else
-          return gistCb()
+          setTimeout ->
+            return gistCb()
+          , Math.random() * 50 + 50
     else
       # post to elastic search
       client.index
@@ -161,7 +163,9 @@ gistParser = (gist, gistCb) ->
         body: es
       , (err) ->
         console.log "indexed", gist.id
-        return gistCb(err)
+        setTimeout ->
+          return gistCb(err)
+        , Math.random() * 50 + 50
 
 deleteGist = (gistId, gistCb) ->
   client.delete
