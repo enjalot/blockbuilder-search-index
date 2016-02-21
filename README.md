@@ -25,7 +25,7 @@ This file is kept up-to-date manually and checked in, via the process below. You
 
 [bl.ocksplorer.org](http://bl.ocksplorer.org) has a user list they maintain that can be downloaded from the [bl.ocksplorer.org form results](https://docs.google.com/spreadsheet/pub?key=0Al5UYaVoRpW3dE12bzRTVEp2RlJDQXdUYUFmODNiTHc&single=true&gid=0&output=csv) and is automatically pulled in by `combine-users.coffee`.
 These users are combined with a dump from the blockbuilder.org database of logged in users (found in `data/mongo-users.json`, it only contains public information found on a users GitHub profile).
-The output of `combine-users.coffee` is `data/users-combined.csv`, which serves as the input to `users.coffee` which will query the GitHub API and make a list of everyone who has at least 1 public gist and save that list to `data/usables.csv`.
+The output of `combine-users.coffee` is `data/users-combined.csv`, which serves as the input to `validate-users.coffee` which will query the GitHub API and make a list of everyone who has at least 1 public gist and save that list to `data/usables.csv`.
 
 ### Gist metadata
 

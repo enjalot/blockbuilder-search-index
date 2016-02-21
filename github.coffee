@@ -34,6 +34,8 @@ getUsersGists = (username, page, since, cb) ->
     qsince = ""
   url = "https://api.github.com/users/#{username}/gists?page=#{page}&per_page=100" + qsince
   request.get ghUrl(url), (err, response, body) ->
+    # TODO: handle errors more consistent
+    console.log err if err
     console.log "x-ratelimit-remaining:", response.headers['x-ratelimit-remaining']
     cb err, response, body
   #console.log("request count", count)

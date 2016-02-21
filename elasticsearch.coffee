@@ -14,6 +14,10 @@ client = new elasticsearch.Client {host: esConfig.host, log: 'trace'}
 # number of missing files
 missing = 0
 
+# we may want to check if a document is in ES before trying to write it
+# this can help us avoid overloading the server with writes when reindexing
+skip = false
+
 done = (err) ->
   console.log "done"
   console.log "skipped #{missing} missing files"
@@ -127,15 +131,34 @@ gistParser = (gist, gistCb) ->
     es = pruneES(gist)
     #console.log "ES", JSON.stringify(es)
 
-    # post to elastic search
-    client.index
-      index: 'blockbuilder'
-      type: 'blocks'
-      id: gist.id
-      body: es
-    , (err, response) ->
-      console.log "indexed", gist.id
-      return gistCb(err, response)
+    if skip
+      client.get
+        index: 'blockbuilder'
+        type: 'blocks'
+        id: gist.id
+      , (err, response) ->
+        if err
+          # post to elastic search, we don't have it indexed yet
+          client.index
+            index: 'blockbuilder'
+            type: 'blocks'
+            id: gist.id
+            body: es
+          , (err, response) ->
+            console.log "indexed", gist.id
+            return gistCb(err, response)
+        else
+          gistCb()
+    else
+      # post to elastic search
+      client.index
+        index: 'blockbuilder'
+        type: 'blocks'
+        id: gist.id
+        body: es
+      , (err, response) ->
+        console.log "indexed", gist.id
+        return gistCb(err, response)
 
 deleteGist = (gistId, gistCb) ->
   client.delete
@@ -154,6 +177,7 @@ module.exports =
 if require.main == module
   # specify the file to load, will probably be data/latest.json for our cron job
   metaFile = process.argv[2] || __dirname + '/data/gist-meta.json'
+  skip = true if process.argv[3] == "skip"
 
   # read in the list of gist metadata
   gistMeta = JSON.parse fs.readFileSync(metaFile).toString()

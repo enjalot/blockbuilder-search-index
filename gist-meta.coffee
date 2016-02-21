@@ -19,7 +19,7 @@ elasticsearch = require('elasticsearch')
 esConfig = require('./config.js').elasticsearch
 client = new elasticsearch.Client esConfig
 
-# recursively fetch result pages from the GitHub API 
+# recursively fetch result pages from the GitHub API
 getPages = (userName, gists, page, since, cb) ->
   gh.getUsersGists userName, page, since, (err, response, body) ->
     newGists = parse(err, body)
@@ -47,7 +47,9 @@ getGistMetaData = ->
       console.log "done with #{user.username}, found #{gists.length} gists"
       gists.forEach (g) ->
         allGists.push g
-      userCb()
+      setTimeout ->
+        userCb()
+      , 50
   , (results) ->
     console.log "done"
     console.log "all gists", allGists.length
@@ -55,7 +57,7 @@ getGistMetaData = ->
     fs.writeFileSync filename, JSON.stringify(newGists)
 
     # log to elastic search
-    summary = 
+    summary =
       script: "meta"
       numBlocks: allGists.length
       filename: filename
@@ -115,4 +117,3 @@ if require.main == module
       fs.writeFileSync filename, JSON.stringify(newGists)
   else
     getGistMetaData()
-

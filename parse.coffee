@@ -68,14 +68,14 @@ categories = Object.keys(categoryColors)
 done = (err) ->
   console.log "done", apiHash
   console.log "skipped #{missing} missing files"
-  fs.writeFileSync "data/apis.json", JSON.stringify(apiHash)
-  fs.writeFileSync "data/colors.json", JSON.stringify(colorHash)
-  fs.writeFileSync "data/blocks.json", JSON.stringify(allBlocks)
-  fs.writeFileSync "data/blocks-min.json", JSON.stringify(minBlocks)
-  fs.writeFileSync "data/blocks-api.json", JSON.stringify(apiBlocks)
-  fs.writeFileSync "data/blocks-colors.json", JSON.stringify(colorBlocks)
-  fs.writeFileSync "data/blocks-colors-min.json", JSON.stringify(colorBlocksMin)
-  fs.writeFileSync "data/files-blocks.json", JSON.stringify(fileBlocks)
+  fs.writeFileSync "data/pasred/apis.json", JSON.stringify(apiHash)
+  fs.writeFileSync "data/pasred/colors.json", JSON.stringify(colorHash)
+  fs.writeFileSync "data/pasred/blocks.json", JSON.stringify(allBlocks)
+  fs.writeFileSync "data/pasred/blocks-min.json", JSON.stringify(minBlocks)
+  fs.writeFileSync "data/pasred/blocks-api.json", JSON.stringify(apiBlocks)
+  fs.writeFileSync "data/pasred/blocks-colors.json", JSON.stringify(colorBlocks)
+  fs.writeFileSync "data/pasred/blocks-colors-min.json", JSON.stringify(colorBlocksMin)
+  fs.writeFileSync "data/pasred/files-blocks.json", JSON.stringify(fileBlocks)
   console.log "err", err if err
   console.log "wrote #{apiBlocks.length} API blocks"
   console.log "wrote #{colorBlocks.length} Color blocks"
@@ -90,11 +90,11 @@ console.log gistMeta.length
 pruneMin = (gist) ->
   pruned = {
     id: gist.id
-    userId: gist.owner.login 
+    userId: gist.owner.login
     description: gist.description
     created_at: gist.created_at
     updated_at: gist.updated_at
-    
+
   }
   if gist.files["thumbnail.png"]
     pruned.thumbnail = gist.files["thumbnail.png"].raw_url
@@ -103,7 +103,7 @@ pruneMin = (gist) ->
 pruneApi = (gist) ->
   pruned = {
     id: gist.id
-    userId: gist.owner.login 
+    userId: gist.owner.login
     #userId: gist.userId
     description: gist.description
     created_at: gist.created_at
@@ -118,7 +118,7 @@ pruneApi = (gist) ->
 pruneColors = (gist) ->
   pruned = {
     id: gist.id
-    userId: gist.owner.login 
+    userId: gist.owner.login
     #userId: gist.userId
     description: gist.description
     created_at: gist.created_at
@@ -132,7 +132,7 @@ pruneColors = (gist) ->
 pruneColorsMin = (gist) ->
   pruned = {
     i: gist.id
-    u: gist.owner.login 
+    u: gist.owner.login
     c: Object.keys(gist.colors) || []
   }
   th = gist.files["thumbnail.png"]?.raw_url
@@ -165,7 +165,7 @@ pruneFiles = (gist) ->
 
 
 parseD3Functions = (code) ->
-  # we match d3.foo.bar( which will find plugins and unnoficial api functions 
+  # we match d3.foo.bar( which will find plugins and unnoficial api functions
   re = new RegExp(/d3\.[a-zA-Z0-9\.]*?\(/g)
   matches = code.match(re) or []
   return matches
@@ -206,11 +206,11 @@ parseColors = (code, gist, gcolorHash) ->
   hex = /#[a-fA-F0-9]{3,6}/g;
   #someone clever could combine these two
   rgb = /rgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/g;
-  rgba = /rgba\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/g; 
-  addColors code, hsl, gcolorHash 
-  addColors code, hex, gcolorHash 
-  addColors code, rgb, gcolorHash 
-  addColors code, rgba, gcolorHash 
+  rgba = /rgba\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/g;
+  addColors code, hsl, gcolorHash
+  addColors code, hex, gcolorHash
+  addColors code, rgb, gcolorHash
+  addColors code, rgba, gcolorHash
   colorNames.forEach (c) ->
     re = new RegExp c.color, "gi"
     addColors code, re, gcolorHash
@@ -252,10 +252,10 @@ gistParser = (gist, gistCb) ->
           numColors = parseColors contents, gist, gcolorHash
           console.log gist.id, fileName, 0, numColors
           return fileCb()
-        else 
+        else
           console.log gist.id, fileName
           return fileCb()
-    else    
+    else
       return fileCb()
   , () ->
     if Object.keys(gapiHash).length > 0
