@@ -148,7 +148,7 @@ gistParser = (gist, gistCb) ->
             console.log "indexed", gist.id
             return gistCb(err, response)
         else
-          gistCb()
+          return gistCb()
     else
       # post to elastic search
       client.index
