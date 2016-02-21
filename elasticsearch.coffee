@@ -191,4 +191,9 @@ if require.main == module
   gistMeta = JSON.parse fs.readFileSync(metaFile).toString()
   console.log gistMeta.length, "gists"
 
+  # I started running into request timeouts and memory errors
+  # when trying to do all 11k at once. I realized I could skip ones
+  # already indexed by slicing the array past whats already been indexed
+  # (gist-meta is an ordered array, new gists are appended to it)
+  #async.eachLimit gistMeta.slice(8500), 20, gistParser, done
   async.eachLimit gistMeta, 20, gistParser, done
