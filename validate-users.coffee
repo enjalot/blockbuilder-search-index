@@ -37,6 +37,7 @@ else
         userCb()
       , 100
   , ->
+    usables = usables.sort()
     str = "username\n" + usables.join("\n")
     console.log "#{usables.length} have at least 1 gist"
     fs.writeFileSync "data/usables.csv", str

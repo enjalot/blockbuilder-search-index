@@ -16,7 +16,9 @@ total = 0
 parseBlockURL = (url) ->
   parts = url.split('//bl.ocks.org/')
   return if !parts[1]
-  username = parts[1].split('/')[0]
+  parts2 = parts[1].split('/')
+  return if parts2.length == 1
+  username = parts2[0]
   return if parseInt(username).toString() == username
   return if username.indexOf("#") >= 0
   return if username == "d"
@@ -24,7 +26,7 @@ parseBlockURL = (url) ->
 
 # STACK OVERFLOW ---------------------------------------------------------------
 # https://numeracy.co/projects/3PM9W1edMyC
-# pull usernames out of block links found on StackOverflow
+# pull usernames out of block links found on StackOverflow, h/t @sirwart
 blocksStr = fs.readFileSync('data/user-sources/bl.ocks.org-links.tsv').toString()
 blocksLinks = d3.tsv.parse(blocksStr)
 blocksLinks.forEach (d) ->
@@ -38,7 +40,8 @@ console.log("#{blocksusers} users from blocks links in SO")
 
 
 # KNIGHT EXAMPLES --------------------------------------------------------------
-# pull usernames out of block links from the knight d3 course
+# pull usernames out of block links from the knight d3 course, h/t @micahstubbs
+# https://docs.google.com/spreadsheets/d/1ByK9bGUrC-VT9xmdnHmrFMXZ-mEapCY2J6OlS1kf4eU/edit#gid=737064445
 blocksStr = fs.readFileSync('data/user-sources/knight-d3-blocks-links.csv').toString()
 blocksLinks2 = d3.csv.parse(blocksStr)
 blocksLinks2.forEach (d) ->
@@ -65,7 +68,7 @@ console.log("#{bbusers} users added from bb")
 
 
 # MANUALLY CURATED USERS -------------------------------------------------------
-# a list of manually currated users
+# a list of manually currated users, h/t @d3visualization
 userscsv = fs.readFileSync('data/user-sources/manually-curated.csv').toString()
 d3.csv.parse userscsv, (user) ->
   username = user["username"]?.toLowerCase()
