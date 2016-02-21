@@ -11,7 +11,7 @@ elasticsearch = require('elasticsearch')
 esConfig = require('./config.js').elasticsearch
 client = new elasticsearch.Client {
   host: esConfig.host,
-  log: 'trace'
+  #log: 'trace'
 }
 
 # number of missing files
@@ -148,9 +148,10 @@ gistParser = (gist, gistCb) ->
             id: gist.id
             body: es
           , (err) ->
-            console.log "indexed", gist.id
+            console.log "indexed~", gist.id
             return gistCb(err)
         else
+          console.log "already", gist.id
           setTimeout ->
             return gistCb()
           , Math.random() * 50 + 50
