@@ -106,7 +106,9 @@ gistFetcher = (gist, gistCb) ->
         #console.log "writing body", body
         fs.writeFile filePath, body, ->
           console.log gist.id, fileName
-          fileCb()
+          setTimeout ->
+            fileCb()
+          , Math.random() * 150 + 150
     else
       fileCb()
   , () ->
@@ -142,5 +144,5 @@ if require.main == module
     async.each gistMeta, gistFetcher, done
     #async.each gistMeta, gistCloner, done
   else
-    async.eachLimit gistMeta, 50, gistFetcher, done
+    async.eachLimit gistMeta, 10, gistFetcher, done
     #async.eachLimit gistMeta, 10, gistCloner, done
