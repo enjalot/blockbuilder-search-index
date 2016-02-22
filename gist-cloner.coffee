@@ -1,3 +1,4 @@
+
 fs = require 'fs'
 d3 = require 'd3'
 async = require 'async'
@@ -11,7 +12,7 @@ esConfig = require('./config.js').elasticsearch
 client = new elasticsearch.Client esConfig
 
 
-base = __dirname + "/data/gists-files/"
+base = __dirname + "/data/gists-clones/"
 timeouts = []
 
 done = (err, pruned) ->
@@ -38,56 +39,47 @@ done = (err, pruned) ->
     console.log "indexed"
     process.exit()
 
-gistFetcher = (gist, gistCb) ->
+gistCloner = (gist, gistCb) ->
+  # I wanted to actually clone all the repositories but it seems to be less reliable.
+  # we get rate limited if we use https:// git urls
+  # and the ssh ones disconnect unexpectedly, probably some sort of rate limiting but it doesn't show in
+  # curl https://api.github.com/rate_limit
   return gistCb() if ids && (gist.id not in ids)
   return gistCb() if singleId && (gist.id != singleId)
-  #console.log "NOT RETURNING", gist.id, singleId
-  fileNames = Object.keys gist.files
+  token = require('./config.js').github.token
+  #console.log("token", token)
   folder = base + gist.id
-  fs.mkdir folder, ->
-  async.each fileNames, (fileName, fileCb) ->
-    ext = path.extname(fileName).toLowerCase()
-    filePath = folder + "/" + fileName
-    if skipExisting
-      try
-        if fs.lstatSync(filePath)
-          # if it exists we skip it
-          console.log "skipping", gist.id, fileName
-          return fileCb()
-      catch e
-        # otherwise we just continue
-    if ext in [".html", ".js", ".coffee", ".md", ".json", ".csv", ".tsv", ".css"]
-      file = gist.files[fileName]
-      request.get file.raw_url, (err, response, body) ->
-        #console.log err, response, body?.length
-        if err
-          console.log "timeout", gist.id
-          timeouts.push gist.id
-          console.log filePath, err
-        return fileCb() unless body
-        #console.log "writing body", body
-        fs.writeFile filePath, body, ->
-          console.log gist.id, fileName
-          setTimeout ->
-            fileCb()
-          , Math.random() * 150 + 150
-    else
-      fileCb()
-  , () ->
-    gistCb()
+  shell.cd(base)
+  # TODO don't use token in clone url (git init; git pull with token)
+  #fs.lstat folder + "/.git", (err, stats) ->
+  fs.lstat folder, (err, stats) ->
+    if stats && stats.isDirectory()
+      console.log "already got", gist.id
+      # we want to be able to pull recently modified gists
+      return gistCb()
+    #shell.exec 'git clone https://' + token + '@gist.github.com/' + gist.id, (code, huh, message) ->
+    shell.exec 'git clone git@gist.github.com:' + gist.id, (code, huh, message) ->
+      console.log "code, message", gist.id, code, message
+      setTimeout ->
+        gistCb()
+      , 250 + Math.random() * 500
 
-
+###
+# TODO: pull inside existing repositories
+console.log("exists, pulling", gist.id)
+shell.cd gist.id
+shell.exec 'git pull origin master', (code, huh, message) ->
+  console.log("pulled", gist.id)
+  return gistCb()
+###
 module.exports =
-  gistFetcher: gistFetcher
+  gistCloner: gistCloner
 
 if require.main == module
-  #base = __dirname + "/data/gists-clones/"
   fs.mkdir base, ->
 
   # specify the file to load, will probably be data/latest.json for our cron job
   metaFile = process.argv[2] || 'data/gist-meta.json'
-  # skip existing files (faster for huge dump, but we want to update latest files)
-  skipExisting = process.argv[3] == "skip" ? true : false
 
   # optionally pass in a csv file or a single id to be downloaded
   param = process.argv[4]
@@ -102,6 +94,6 @@ if require.main == module
   gistMeta = JSON.parse fs.readFileSync(metaFile).toString()
   console.log "number of gists", gistMeta.length
   if singleId or ids
-    async.each gistMeta, gistFetcher, done
+    async.each gistMeta, gistCloner, done
   else
-    async.eachLimit gistMeta, 10, gistFetcher, done
+    async.eachLimit gistMeta, 5, gistCloner, done
