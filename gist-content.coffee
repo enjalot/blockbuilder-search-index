@@ -39,6 +39,8 @@ done = (err, pruned) ->
     process.exit()
 
 gistFetcher = (gist, gistCb) ->
+  return gistCb() if !gist
+  return gistCb() if !gist.files
   return gistCb() if ids && (gist.id not in ids)
   return gistCb() if singleId && (gist.id != singleId)
   #console.log "NOT RETURNING", gist.id, singleId

@@ -18,15 +18,20 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.get('/index/gist/:gistId', function(req, res) {
   res.status(200).send("Ok"); // we always send OK, this shouldn't interupt app
   var gistId = req.params.gistId;
-  gh.getGist(gistId, function(err, response, body){
-    if(err) return console.log(gistId, err)
-    var gist = JSON.parse(body)
-    content.gistFetcher(gist, function(err) {
-      es.gistParser(gist, function(err) {
-        return;
+  console.log(new Date(), "indexing", gistId)
+  try {
+    gh.getGist(gistId, function(err, response, body){
+      if(err) return console.log(gistId, err)
+      var gist = JSON.parse(body)
+      content.gistFetcher(gist, function(err) {
+        es.gistParser(gist, function(err) {
+          return;
+        })
       })
     })
-  })
+  } catch (e) {
+    console.log(e);
+  }
 });
 
 app.get('/delete/gist/:gistId', function(req, res) {
