@@ -108,7 +108,7 @@ gistParser = (gist, gistCb) ->
           #console.log gist.id, fileName
           return fileCb()
     else
-      return fileCb()
+      return process.nextTick(fileCb)
   , () ->
     if Object.keys(gapiHash).length > 0
       gist.api = gapiHash
