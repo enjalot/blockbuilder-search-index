@@ -29,10 +29,9 @@ done = (err) ->
 
 
 pruneES = (gist) ->
-
   # the JSON we will be sending to elasticsearch
   pruned = {
-    userId: gist.owner.login
+    userId: gist.owner?.login || "anonymous"
     description: gist.description
     created_at: gist.created_at
     updated_at: gist.updated_at
@@ -132,6 +131,8 @@ gistParser = (gist, gistCb) ->
     if gist.files["index.html"]
       gist.code = gist.files["index.html"].content
 
+    if(!gist.owner) return gistCb()
+      
     es = pruneES(gist)
     #console.log "ES", JSON.stringify(es)
 
