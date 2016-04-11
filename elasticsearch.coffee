@@ -131,8 +131,8 @@ gistParser = (gist, gistCb) ->
     if gist.files["index.html"]
       gist.code = gist.files["index.html"].content
 
-    if(!gist.owner) return gistCb()
-      
+    return gistCb() if !gist.owner
+
     es = pruneES(gist)
     #console.log "ES", JSON.stringify(es)
 
