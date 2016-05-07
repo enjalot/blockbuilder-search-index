@@ -51,8 +51,9 @@ The `data/gist-meta.json` file is checked into the repository for now, and is al
 
 
 ### Gist content
-The second step in the process is to download gist contents via raw urls and save them to disk in `data/gists-files/`. We selectively download files of certain types (see the code in `gist-content.coffee`) which saves us about 60% vs. cloning all of the gists.
-```
+The second step in the process is to download gist contents via raw urls and save them to disk in `data/gists-files/`. We selectively download files of certain types (see the code in `gist-content.coffee`) which saves us about 60% vs. cloning all of the gists.  
+
+```bash
 # default, will download all the files found in data/gist-meta.json
 coffee gist-content.coffee
 # specify file with list of gists
