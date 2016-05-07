@@ -32,7 +32,7 @@ These users are combined with data exported from the [blockbuilder.org](blockbui
 
 ### Gist metadata
 
-The first step in the process is to obtain a list of gists we would like to process. We do this by querying the [GitHub API for each user](https://developer.github.com/v3/gists/#list-a-users-gists).
+First we query the [GitHub API for each user](https://developer.github.com/v3/gists/#list-a-users-gists) to obtain a list of gists that we would like to process.
 
 ```shell
 # generate data/gist-meta.json, the list of all blocks
