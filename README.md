@@ -45,10 +45,18 @@ coffee gist-meta.coffee data/latest.json 15min
 coffee gist-meta.coffee data/latest.json 2015-02-14T00:00:00Z
 ```
 
-`data/gist-meta.json` is kept up-to-date manually and checked in to the [blockbuilder-search-index](https://github.com/enjalot/blockbuilder-search-index) repository. When deployed, this code uses `data/gist-meta.json` to bootstrap the search index. After deployment, [cronjobs](https://en.wikipedia.org/wiki/Cron) will create `data/latest.json` every 15 minutes. Later in the pipeline, we use `data/latest.json` to index the gists in [Elasticsearch](https://www.elastic.co/products/elasticsearch)
+`data/gist-meta.json` is kept up-to-date manually and checked in to the [blockbuilder-search-index](https://github.com/enjalot/blockbuilder-search-index) repository. When deployed, this code uses `data/gist-meta.json` to bootstrap the search index. After deployment, [cronjobs](https://en.wikipedia.org/wiki/Cron) will create `data/latest.json` every 15 minutes. Later in the pipeline, we use `data/latest.json` to index the gists in [Elasticsearch](https://www.elastic.co/products/elasticsearch).
 
 ### Gist content
-The second step in the process is to download gist contents via raw urls and save them to disk in `data/gists-files/`. We selectively download files of certain types (see the code in `gist-content.coffee`) which saves us about 60% vs. cloning all of the gists.  
+The second step in the process is to download the contents of each gist via a GitHub [raw urls](http://stackoverflow.com/a/4605068/1732222) and save the files to disk in `data/gists-files/`. We selectively download files of certain types 
+
+`gist-content.coffee`:
+
+```coffeescript
+if ext in [".html", ".js", ".coffee", ".md", ".json", ".csv", ".tsv", ".css"]
+```
+
+This filter-by-file-extension selective download approach consumes 60% less disk space than naively cloning all of the gists.  
 
 ```shell
 # default, will download all the files found in data/gist-meta.json
