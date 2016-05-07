@@ -45,8 +45,7 @@ coffee gist-meta.coffee data/latest.json 15min
 coffee gist-meta.coffee data/latest.json 2015-02-14T00:00:00Z
 ```
 
-The `data/gist-meta.json` file is checked into the repository for now, and is also kept up-to-date manually. The deployment of this code uses it as a way to bootstrap the search index, after which cronjobs will create `data/latest.json` every 15 minutes for the next steps of the pipeline.
-
+`data/gist-meta.json` is kept up-to-date manually and checked in to the [blockbuilder-search-index](https://github.com/enjalot/blockbuilder-search-index) repository. When deployed, this code uses `data/gist-meta.json` to bootstrap the search index. After deployment, [cronjobs](https://en.wikipedia.org/wiki/Cron) will create `data/latest.json` every 15 minutes. Later in the pipeline, we use `data/latest.json` to index the gists in [Elasticsearch](https://www.elastic.co/products/elasticsearch)
 
 ### Gist content
 The second step in the process is to download gist contents via raw urls and save them to disk in `data/gists-files/`. We selectively download files of certain types (see the code in `gist-content.coffee`) which saves us about 60% vs. cloning all of the gists.  
@@ -80,9 +79,9 @@ I wanted a script that would take in a list of block URLS and give me a subset o
 coffee gallery.coffee data/unconf.csv data/out.json
 ```
 
-## Elasticsearch
+## [Elasticsearch](https://www.elastic.co/products/elasticsearch)
 
-Once you have a list of gists (either `data/gist-meta.json`, `data/latest.json` or otherwise) and you've downloaded the content to `data/gist-files/` you can index the gists to Elasticsearch:
+Once you have a list of gists (either `data/gist-meta.json`, `data/latest.json` or otherwise) and you've downloaded the content to `data/gist-files/` you can index the gists to [Elasticsearch](https://www.elastic.co/products/elasticsearch):
 ```
 coffee elasticsearch.coffee
 # index from a specific file
@@ -98,7 +97,7 @@ This is used to keep the index immediately up-to-date when a user saves or forks
 Currently the save/fork functionality will index if it sees that the gist is public, and it will delete if it sees that the gist is private. This way if you make a previously public gist private
 and updated it via blockbuilder it will be removed from the search index.
 
-I deploy it to the same server as Elasticsearch, and have security groups setup so that its not publicly accessible (only my blockbuilder server can access it)
+I deploy it to the same server as [Elasticsearch](https://www.elastic.co/products/elasticsearch), and have security groups setup so that its not publicly accessible (only my blockbuilder server can access it)
 ```
 node server.js
 ```
