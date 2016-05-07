@@ -2,9 +2,7 @@
 This repo is a combination of utility scripts and services that support the continuous scraping and indexing
 of public blocks. It powers [Blockbuilder](http://blockbuilder.org)'s [search page](http://blockbuilder.org/search).
 
-[Blocks](https://bl.ocks.org) are stored as GitHub [gists](https://gist.github.com), which are essentially mini git repositories. If a gist has an `index.html` file, d3 example viewers like [blockbuilder.org](blockbuilder.org) or [bl.ocks.org](bl.ocks.org) will render the page contained in the gist.  
-
-Given a list of users we can query the [GitHub API](https://developer.github.com/v3/gists/) for the latest public gists that each of those users has updated or created.
+[Blocks](https://bl.ocks.org) are stored as GitHub [gists](https://gist.github.com), which are essentially mini git repositories. If a gist has an `index.html` file, d3 example viewers like [blockbuilder.org](blockbuilder.org) or [bl.ocks.org](bl.ocks.org) will render the page contained in the gist.  Given a list of users we can query the [GitHub API](https://developer.github.com/v3/gists/) for the latest public gists that each of those users has updated or created.
 We can then filter those gists to see only those gists which have an `index.html` file. 
 
 Once we have a list of gists
@@ -53,7 +51,7 @@ The `data/gist-meta.json` file is checked into the repository for now, and is al
 ### Gist content
 The second step in the process is to download gist contents via raw urls and save them to disk in `data/gists-files/`. We selectively download files of certain types (see the code in `gist-content.coffee`) which saves us about 60% vs. cloning all of the gists.  
 
-```bash
+```shell
 # default, will download all the files found in data/gist-meta.json
 coffee gist-content.coffee
 # specify file with list of gists
