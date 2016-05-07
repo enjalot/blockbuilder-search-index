@@ -50,7 +50,7 @@ coffee gist-meta.coffee data/latest.json 2015-02-14T00:00:00Z
 ### Gist content
 The second step in the process is to download the contents of each gist via a GitHub [raw urls](http://stackoverflow.com/a/4605068/1732222) and save the files to disk in `data/gists-files/`. We selectively download files of certain types 
 
-`gist-content.coffee`:
+[`gist-content.coffee`](gist-content.coffee):
 
 ```coffeescript
 if ext in [".html", ".js", ".coffee", ".md", ".json", ".csv", ".tsv", ".css"]
