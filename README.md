@@ -2,36 +2,41 @@
 This repo is a combination of utility scripts and services that support the continuous scraping and indexing
 of public blocks. It powers [Blockbuilder](http://blockbuilder.org)'s [search page](http://blockbuilder.org/search).
 
-[Blocks](https://bl.ocks.org) are stored as GitHub [gists](https://gist.github.com), which are essentially mini git repositories.
-Given a list of users we can query the [GitHub API](https://developer.github.com/v3/gists/) for the latest public gists each of those users has updated or created.
-We can then filter those gists to just those which have an `index.html` file (the main prerequisite for a block to be rendered). Once we have a list of gists
-from the API we can download their files to disk for further processing. The main thrust here is to index some of those files in Elasticsearch so we can provide
-a search engine over them.
+[Blocks](https://bl.ocks.org) are stored as GitHub [gists](https://gist.github.com), which are essentially mini git repositories. If a gist has an `index.html` file, d3 example viewers like [blockbuilder.org](blockbuilder.org) or [bl.ocks.org](bl.ocks.org) will render the page contained in the gist.  
 
-We also have a script that will output several json files that can be used to make visualizations such as [all the blocks](http://bl.ocks.org/enjalot/1d679f0322174b65d032).
+Given a list of users we can query the [GitHub API](https://developer.github.com/v3/gists/) for the latest public gists that each of those users has updated or created.
+We can then filter those gists to see only those gists which have an `index.html` file. 
+
+Once we have a list of gists
+from the API we can download the files from each gist to disk for further processing. Then, we want to index some of those files in [Elasticsearch](https://www.elastic.co/products/elasticsearch).  This allows us to run our own search engine for the files inside of gists that we are interested in.
+
+We also have a script that will output several `.json` files that can be used to create visualizations such as [all the blocks](http://bl.ocks.org/enjalot/1d679f0322174b65d032) and the ones described in [this post](https://medium.com/@enjalot/searching-for-examples-2c0f75709c1a#.4fr5vuq7k).
 
 ##  Setup
 
 ### Config.js
-You will need to create `config.js` before running any of the below commands, you can copy `config.js.example` and replace the placeholders with [application tokens](https://github.com/settings/applications/new). This token is important because otherwise you will quickly run into rate limits from the GitHub API running the below scripts.
-This is also where you will configure Elasticsearch and the RPC server if you are running them.
+First create a `config.js` file. You can copy `config.js.example` and replace the placeholders with a GitHub [application token](https://github.com/settings/applications/new). This token is important because it frees you from GitHub API rate limits you would encounter running these scripts without a token.
+
+`config.js` is also the place to configure [Elasticsearch](https://www.elastic.co/products/elasticsearch) and the [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) server, if you plan to run them.
 
 ## Scraping
 
 ### List of users to scrape
 
-There are several files related to users. The most important is the file listing users that have at least 1 public gist: `data/usables.csv`.
-This file is kept up-to-date manually and checked in, via the process below. You don't need to run any of this unless you want to add a new source of users, the easiest would be to just add a username to the end of `data/usables.csv`.
+There are several files related to users. The most important is `data/usables.csv`, a list of GitHub users that have at least 1 public gist. 
+`data/usables.csv` is kept up-to-date manually via the process below. After each manual update, `data/usables.csv` is checked in to the [blockbuilder-search-index](https://github.com/enjalot/blockbuilder-search-index) repository.
+
+Only run these scripts if you want to add a batch of users from a new source. It is also possible to manually edit `data/usables.csv` and add a new username to the end of the file.
 
 [bl.ocksplorer.org](http://bl.ocksplorer.org) has a user list they maintain that can be downloaded from the [bl.ocksplorer.org form results](https://docs.google.com/spreadsheet/pub?key=0Al5UYaVoRpW3dE12bzRTVEp2RlJDQXdUYUFmODNiTHc&single=true&gid=0&output=csv) and is automatically pulled in by `combine-users.coffee`.
-These users are combined with a dump from the blockbuilder.org database of logged in users (found in `data/mongo-users.json`, it only contains public information found on a users GitHub profile).
-The output of `combine-users.coffee` is `data/users-combined.csv`, which serves as the input to `validate-users.coffee` which will query the GitHub API and make a list of everyone who has at least 1 public gist and save that list to `data/usables.csv`.
+These users are combined with data exported from the [blockbuilder.org](blockbuilder.org) database of logged in users (found in `data/user-sources/blockbuilder-users.json`. These user data only contains publically available information from a user's GitHub profile.
+`combine-users.coffee` produces the file `data/users-combined.csv`, which serves as the input to `validate-users.coffee` which then will query the GitHub API and make a list of everyone who has at least 1 public gist.   `validate-users.coffee` then saves that list to `data/usables.csv`.
 
 ### Gist metadata
 
 The first step in the process is to obtain a list of gists we would like to process. We do this by querying the [GitHub API for each user](https://developer.github.com/v3/gists/#list-a-users-gists).
 
-```
+```shell
 # generate data/gist-meta.json, the list of all blocks
 coffee gist-meta.coffee
 # save to a different file
