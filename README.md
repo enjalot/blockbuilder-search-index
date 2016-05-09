@@ -62,9 +62,9 @@ This filter-by-file-extension selective download approach consumes 60% less disk
 # default, will download all the files found in data/gist-meta.json
 coffee gist-content.coffee
 # specify file with list of gists
-coffee gist-content data/latest.json
+coffee gist-content.coffee data/latest.json
 # skip existing files (saves time, might miss updates)
-coffee gist-content data/gist-meta.json skip
+coffee gist-content.coffee data/gist-meta.json skip
 ```
 
 ### Flat data files
