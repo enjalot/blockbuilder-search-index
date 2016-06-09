@@ -25,9 +25,11 @@ else
     euStr = fs.readFileSync('data/usables.csv').toString()
     eu = d3.csv.parse euStr
     eu.forEach (u) ->
-      existingUsers.push u.login
-
+      existingUsers.push u.username
+    console.log "#{existingUsers.length} existing users"
   catch e
+    console.log "couldn't read existing usables.csv"
+
   usersString = fs.readFileSync('data/users-combined.csv').toString()
   users = d3.csv.parse usersString
   usables = []
@@ -47,16 +49,14 @@ else
       #  console.log "no gists", u.login
       setTimeout ->
         userCb()
-      , 100
+      , 50
   , ->
     usables = usables.sort()
     str = "username\n" + usables.join("\n")
     console.log "#{usables.length} have at least 1 gist"
     fs.writeFileSync "data/usables.csv", str
 
-    ### TODO: debug this
     newUsers = newUsers.sort()
     str = "username\n" + newUsers.join("\n")
     console.log "#{newUsers.length} new users"
     fs.writeFileSync "data/new-usables.csv", str
-    ###
