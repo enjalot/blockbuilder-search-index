@@ -43,6 +43,8 @@ coffee gist-meta.coffee data/latest.json
 coffee gist-meta.coffee data/latest.json 15min
 # only get gists since a date in YYYY-MM-DDTHH:MM:SSZ format
 coffee gist-meta.coffee data/latest.json 2015-02-14T00:00:00Z
+# get all the gists for new users
+coffee gist-meta.coffee data/new.json '' 'new-users'
 ```
 
 [`data/gist-meta.json`](data/gist-meta.json) is kept up-to-date manually and checked in to the [blockbuilder-search-index](https://github.com/enjalot/blockbuilder-search-index) repository. When deployed, this code uses `data/gist-meta.json` to bootstrap the search index. After deployment, [cronjobs](https://en.wikipedia.org/wiki/Cron) will create [`data/latest.json`](data/latest.json) every 15 minutes. Later in the pipeline, we use [`data/latest.json`](data/latest.json) to index the gists in [Elasticsearch](https://www.elastic.co/products/elasticsearch).
