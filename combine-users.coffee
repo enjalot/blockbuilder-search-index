@@ -7,8 +7,6 @@ d3 = require 'd3'
 request = require 'request'
 fs = require 'fs'
 
-
-userDoc = "https://docs.google.com/spreadsheet/pub?key=0Al5UYaVoRpW3dE12bzRTVEp2RlJDQXdUYUFmODNiTHc&single=true&gid=0&output=csv";
 userHash = {}
 
 total = 0
@@ -80,9 +78,10 @@ total += csvusers
 console.log("#{csvusers} added from manual list of users")
 
 
-
-# BLOCKSPLORER FORM SUBMISSIONS ------------------------------------------------
-# pull from the form provided by bocoup for blockscanner
+# BL.OCKSPLORER FORM SUBMISSIONS ------------------------------------------------
+# pull from the Google form provided by @ireneros @bocoup for blockscanner & http://bl.ocksplorer.org/ 
+# https://docs.google.com/forms/d/1VdDdycNuqJVw3Ik6-ZLj6v7X9g2vWlw_RCC3RCfD9-I/viewform
+userDoc = "https://docs.google.com/spreadsheet/pub?key=0Al5UYaVoRpW3dE12bzRTVEp2RlJDQXdUYUFmODNiTHc&single=true&gid=0&output=csv";
 column = 'Provide a github username to the person whose blocks (gists) we should scan for d3 API usage'
 request.get userDoc, (err, response, body) ->
   d3.csv.parse body, (user) ->

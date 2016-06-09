@@ -68,14 +68,14 @@ categories = Object.keys(categoryColors)
 done = (err) ->
   console.log "done", apiHash
   console.log "skipped #{missing} missing files"
-  fs.writeFileSync "data/pasred/apis.json", JSON.stringify(apiHash)
-  fs.writeFileSync "data/pasred/colors.json", JSON.stringify(colorHash)
-  fs.writeFileSync "data/pasred/blocks.json", JSON.stringify(allBlocks)
-  fs.writeFileSync "data/pasred/blocks-min.json", JSON.stringify(minBlocks)
-  fs.writeFileSync "data/pasred/blocks-api.json", JSON.stringify(apiBlocks)
-  fs.writeFileSync "data/pasred/blocks-colors.json", JSON.stringify(colorBlocks)
-  fs.writeFileSync "data/pasred/blocks-colors-min.json", JSON.stringify(colorBlocksMin)
-  fs.writeFileSync "data/pasred/files-blocks.json", JSON.stringify(fileBlocks)
+  fs.writeFileSync "data/parsed/apis.json", JSON.stringify(apiHash)
+  fs.writeFileSync "data/parsed/colors.json", JSON.stringify(colorHash)
+  fs.writeFileSync "data/parsed/blocks.json", JSON.stringify(allBlocks)
+  fs.writeFileSync "data/parsed/blocks-min.json", JSON.stringify(minBlocks)
+  fs.writeFileSync "data/parsed/blocks-api.json", JSON.stringify(apiBlocks)
+  fs.writeFileSync "data/parsed/blocks-colors.json", JSON.stringify(colorBlocks)
+  fs.writeFileSync "data/parsed/blocks-colors-min.json", JSON.stringify(colorBlocksMin)
+  fs.writeFileSync "data/parsed/files-blocks.json", JSON.stringify(fileBlocks)
   console.log "err", err if err
   console.log "wrote #{apiBlocks.length} API blocks"
   console.log "wrote #{colorBlocks.length} Color blocks"
@@ -165,7 +165,7 @@ pruneFiles = (gist) ->
 
 
 parseD3Functions = (code) ->
-  # we match d3.foo.bar( which will find plugins and unnoficial api functions
+  # we match d3.foo.bar( which will find plugins and unofficial api functions
   re = new RegExp(/d3\.[a-zA-Z0-9\.]*?\(/g)
   matches = code.match(re) or []
   return matches
