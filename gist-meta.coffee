@@ -6,6 +6,15 @@ moment = require 'moment'
 
 gh = require './github'
 
+###
+# get all gists for everyone
+coffee gist-meta.coffee
+# get all gists updated/created in last 20 minutes for everyone
+coffee gist-meta.coffee latest.json 20min
+# get all gists for the new users (found in data/new-usables.csv)
+coffee gist-meta.coffee '' '' new-users
+###
+
 filename = process.argv[2] || "data/gist-meta.json"
 since = process.argv[3] || ""  # "2015-10-01T00:00:00Z"
 if since == "15min"
@@ -16,6 +25,7 @@ if since == "20min"
   since = moment().subtract(20, "minutes")
   .utc()
     .format("YYYY-MM-DDTHH:mm:ss[Z]")
+
 singleUsername = process.argv[4]
 
 # we will log our progress in ES
@@ -43,27 +53,38 @@ getPages = (userName, gists, page, since, cb) ->
 # using the "since" date. If no date is specified it gets the blocks since the
 # start of time
 getGistMetaData = ->
-  usersString = fs.readFileSync(__dirname + '/data/usables.csv').toString()
+  if singleUsername and singleUsername == "new-users"
+    usables = __dirname + '/data/new-usables.csv'
+  else
+    usables = __dirname + '/data/usables.csv'
+
+  console.log "reading users from ", usables
+
+  usersString = fs.readFileSync(usables).toString()
   users = d3.csv.parse usersString
-  allGists = []
+  newGists = []
   async.eachLimit users, 5, (user, userCb) ->
     getPages user.username, [], 1, since, (gists) ->
       console.log "done with #{user.username}, found #{gists.length} gists"
       gists.forEach (g) ->
-        allGists.push g
+        newGists.push g
       setTimeout ->
         userCb()
       , 50
   , (results) ->
-    console.log "done"
-    console.log "all gists", allGists.length
-    newGists = combine allGists
-    fs.writeFileSync filename, JSON.stringify(newGists)
+    console.log "done. number of new gists:", newGists.length
+
+    # we always save to gist-meta.json
+    saveGistMeta(newGists)
+    # we write our gists to the specified file name if its not gist-meta
+    if filename != 'data/gist-meta.json'
+      console.log "writing #{newGists.length} to #{filename}"
+      fs.writeFileSync filename, JSON.stringify(newGists)
 
     # log to elastic search
     summary =
       script: "meta"
-      numBlocks: allGists.length
+      numBlocks: newGists.length
       filename: filename
       since: since || new Date("1970-01-01")
       ranAt: new Date()
@@ -75,34 +96,32 @@ getGistMetaData = ->
       console.log "indexed"
       process.exit()
 
+saveGistMeta = (newGists) ->
+  try
+    blocksList = JSON.parse(fs.readFileSync(__dirname + '/data/gist-meta.json').toString() || "[]")
+  catch e
+    blocksList = []
+  allGists = combine(blocksList, newGists)
+  console.log "writing #{allGists.length} blocks to data/gist-meta.json"
+  fs.writeFileSync __dirname + '/data/gist-meta.json', JSON.stringify(allGists)
+  return
+
 # this function combines the new gist meta-data with what we may have already
 # gotten before. This allows us to accumulate new blocks incrementally
-combine = (newGists) ->
-  if filename.indexOf("data/latest.json") >= 0
-    # for latest gists we don't want to accumulate from multiple runs
-    blocksList = []
-  else
-    try
-      blocksList = JSON.parse(fs.readFileSync(filename).toString() || "[]")
-    catch e
-      blocksList = []
-
-  console.log "loaded #{blocksList.length} existing blocks"
+combine = (oldGists, newGists) ->
+  console.log "combining #{newGists.length} with #{oldGists.length} existing blocks"
   blocks = {}
-  blocksList.forEach (block) ->
+  oldGists.forEach (block) ->
     blocks[block.id] = block
 
   newGists.forEach (gist) ->
     blocks[gist.id] = gist
 
   ids = Object.keys(blocks)
-  console.log "now we have #{ids.length} blocks"
   newBlockList = []
   ids.forEach (id) ->
     newBlockList.push blocks[id]
-  console.log "just to be sure #{newBlockList.length}"
   return newBlockList
-
 
 parse = (err, body) ->
   return null if err
@@ -112,12 +131,13 @@ parse = (err, body) ->
     return null
 
 if require.main == module
-  if singleUsername
+  if singleUsername and singleUsername != "new-users"
     console.log "username", singleUsername
     getPages singleUsername, [], 1, since, (gists) ->
       gists.forEach (g) ->
         console.log g.id, g.description
-      newGists = combine gists
-      fs.writeFileSync filename, JSON.stringify(newGists)
+      fs.writeFileSync filename, JSON.stringify(gists)
+      # we always write to our gist-meta file
+      saveGistMeta(gists)
   else
     getGistMetaData()
