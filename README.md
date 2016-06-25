@@ -3,7 +3,7 @@ This repo is a combination of utility scripts and services that support the cont
 of public blocks. It powers [Blockbuilder](http://blockbuilder.org)'s [search page](http://blockbuilder.org/search).
 
 [Blocks](https://bl.ocks.org) are stored as GitHub [gists](https://gist.github.com), which are essentially mini git repositories. If a gist has an `index.html` file, d3 example viewers like [blockbuilder.org](blockbuilder.org) or [bl.ocks.org](bl.ocks.org) will render the page contained in the gist.  Given a list of users we can query the [GitHub API](https://developer.github.com/v3/gists/) for the latest public gists that each of those users has updated or created.
-We can then filter those gists to see only those gists which have an `index.html` file. 
+We can then filter those gists to see only those gists which have an `index.html` file.
 
 Once we have a list of gists
 from the API we can download the files from each gist to disk for further processing. Then, we want to index some of those files in [Elasticsearch](https://www.elastic.co/products/elasticsearch).  This allows us to run our own search engine for the files inside of gists that we are interested in.
@@ -21,14 +21,20 @@ First create a `config.js` file. You can copy [`config.js.example`](config.js.ex
 
 ### List of users to scrape
 
-There are several files related to users. The most important is [`data/usables.csv`](data/usables.csv), a list of GitHub users that have at least 1 public gist. 
+There are several files related to users. The most important is [`data/usables.csv`](data/usables.csv), a list of GitHub users that have at least 1 public gist.
 [`data/usables.csv`](data/usables.csv) is kept up-to-date manually via the process below. After each manual update, [`data/usables.csv`](data/usables.csv) is checked in to the [blockbuilder-search-index](https://github.com/enjalot/blockbuilder-search-index) repository.
 
-Only run these scripts if you want to add a batch of users from a new source. It is also possible to manually edit [`data/usables.csv`](data/usables.csv) and add a new username to the end of the file.
+Only run these scripts if you want to add a batch of users from a new source. It is also possible to manually edit [`data/user-sources/manually-curated.csv`](data/user-sources/manually-curated.csv) and add a new username to the end of the file.
 
 [bl.ocksplorer.org](http://bl.ocksplorer.org) has a user list they maintain that can be downloaded from the [bl.ocksplorer.org form results](https://docs.google.com/spreadsheet/pub?key=0Al5UYaVoRpW3dE12bzRTVEp2RlJDQXdUYUFmODNiTHc&single=true&gid=0&output=csv) and is automatically pulled in by [`combine-users.coffee`](combine-users.coffee).
 These users are combined with data exported from the [blockbuilder.org](blockbuilder.org) database of logged in users (found in [`data/user-sources/blockbuilder-users.json`](data/user-sources/blockbuilder-users.json). These user data only contains publically available information from a user's GitHub profile.
 [`combine-users.coffee`](combine-users.coffee) produces the file [`data/users-combined.csv`](data/users-combined.csv), which serves as the input to [`validate-users.coffee`](validate-users.coffee) which then will query the GitHub API and make a list of everyone who has at least 1 public gist. [`validate-users.coffee`](validate-users.coffee) then saves that list to [`data/usables.csv`](data/usables.csv).
+
+```shell
+# create new user list if any user sources have been updated
+coffee combine-users.coffee
+coffee validate-users.coffee
+```
 
 ### Gist metadata
 
@@ -50,7 +56,7 @@ coffee gist-meta.coffee data/new.json '' 'new-users'
 [`data/gist-meta.json`](data/gist-meta.json) is kept up-to-date manually and checked in to the [blockbuilder-search-index](https://github.com/enjalot/blockbuilder-search-index) repository. When deployed, this code uses `data/gist-meta.json` to bootstrap the search index. After deployment, [cronjobs](https://en.wikipedia.org/wiki/Cron) will create [`data/latest.json`](data/latest.json) every 15 minutes. Later in the pipeline, we use [`data/latest.json`](data/latest.json) to index the gists in [Elasticsearch](https://www.elastic.co/products/elasticsearch).
 
 ### Gist content
-The second step in the process is to download the contents of each gist via a GitHub [raw urls](http://stackoverflow.com/a/4605068/1732222) and save the files to disk in `data/gists-files/`. We selectively download files of certain types 
+The second step in the process is to download the contents of each gist via a GitHub [raw urls](http://stackoverflow.com/a/4605068/1732222) and save the files to disk in `data/gists-files/`. We selectively download files of certain types
 
 [`gist-content.coffee`](gist-content.coffee):
 
