@@ -39,10 +39,10 @@ done = (err, pruned) ->
     process.exit()
 
 gistFetcher = (gist, gistCb) ->
-  return process.nextTick(gistCb) if !gist
-  return process.nextTick(gistCb) if !gist.files
-  return process.nextTick(gistCb) if ids && (gist.id not in ids)
-  return process.nextTick(gistCb) if singleId && (gist.id != singleId)
+  return setImmediate(gistCb) if !gist
+  return setImmediate(gistCb) if !gist.files
+  return setImmediate(gistCb) if ids && (gist.id not in ids)
+  return setImmediate(gistCb) if singleId && (gist.id != singleId)
   #console.log "NOT RETURNING", gist.id, singleId
   fileNames = Object.keys gist.files
   folder = base + gist.id
@@ -55,7 +55,7 @@ gistFetcher = (gist, gistCb) ->
         if fs.lstatSync(filePath)
           # if it exists we skip it
           console.log "skipping", gist.id, fileName
-          return process.nextTick(fileCb)
+          return setImmediate(fileCb)
       catch e
         # otherwise we just continue
     if ext in [".html", ".js", ".coffee", ".md", ".json", ".csv", ".tsv", ".css"]
@@ -74,7 +74,7 @@ gistFetcher = (gist, gistCb) ->
             fileCb()
           , Math.random() * 150 + 150
     else
-      process.nextTick(fileCb)
+      setImmediate(fileCb)
   , () ->
     gistCb()
 

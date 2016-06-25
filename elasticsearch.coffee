@@ -62,7 +62,7 @@ pruneES = (gist) ->
 processed = 0
 gistParser = (gist, gistCb) ->
   #console.log "NOT RETURNING", gist.id, singleId
-  return process.nextTick(gistCb) if not gist?.files
+  return setImmediate(gistCb) if not gist?.files
   fileNames = Object.keys gist.files
   # per-gist cache of api functions that we build up in place
   gapiHash = {}
@@ -108,7 +108,7 @@ gistParser = (gist, gistCb) ->
           #console.log gist.id, fileName
           return fileCb()
     else
-      return process.nextTick(fileCb)
+      return setImmediate(fileCb)
   , () ->
     if Object.keys(gapiHash).length > 0
       gist.api = gapiHash
