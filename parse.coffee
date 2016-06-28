@@ -24,6 +24,10 @@ colorHash = {}
 colorBlocks = []
 colorBlocksMin = []
 
+# libararies and their versions
+libHash = {}
+libBlocks = []
+
 # number of missing files
 missing = 0
 
@@ -76,6 +80,12 @@ done = (err) ->
   fs.writeFileSync "data/parsed/blocks-colors.json", JSON.stringify(colorBlocks)
   fs.writeFileSync "data/parsed/blocks-colors-min.json", JSON.stringify(colorBlocksMin)
   fs.writeFileSync "data/parsed/files-blocks.json", JSON.stringify(fileBlocks)
+
+  libcsv = "url,count\n"
+  Object.keys(libHash).forEach (lib) ->
+    libcsv += lib + "," + libHash[lib] + "\n"
+  fs.writeFileSync("data/parsed/libs.csv", libcsv)
+
   console.log "err", err if err
   console.log "wrote #{apiBlocks.length} API blocks"
   console.log "wrote #{colorBlocks.length} Color blocks"
@@ -163,7 +173,6 @@ pruneFiles = (gist) ->
   return prunes
 
 
-
 parseD3Functions = (code) ->
   # we match d3.foo.bar( which will find plugins and unofficial api functions
   re = new RegExp(/d3\.[a-zA-Z0-9\.]*?\(/g)
@@ -218,12 +227,31 @@ parseColors = (code, gist, gcolorHash) ->
   return Object.keys(gcolorHash).length
 
 
+parseScriptTags = (code) ->
+  re = new RegExp /<script.*?src=[\"\'](.*?\/\/.+?)[\"\'].*?>/g
+  matches = []
+  match = re.exec(code)
+  while match != null
+    matches.push match[1]
+    match = re.exec(code)
+  return matches
+
+parseLibs = (code, gist, glibHash) ->
+  scripts = parseScriptTags(code)
+  scripts.forEach (script) ->
+    #console.log script
+    libHash[script] = 0 unless libHash[script]
+    libHash[script]++
+  return 0
+
 
 gistParser = (gist, gistCb) ->
   #console.log "NOT RETURNING", gist.id, singleId
+  console.log gist.id
   fileNames = Object.keys gist.files
   # per-gist cache of api functions that we build up in place
   gapiHash = {}
+  glibHash = {}
   gcolorHash = {}
   folder = __dirname + "/" + "data/gists-files/" + gist.id
   fs.mkdir folder, ->
@@ -239,21 +267,23 @@ gistParser = (gist, gistCb) ->
       fs.readFile file, (err, data) ->
         return fileCb() unless data
         contents = data.toString()
+        if ext == ".html"
+          numLibs = parseLibs contents, gist, glibHash
         if ext in [".html", ".js", ".coffee"]
           numApis = parseApi contents, gist, gapiHash
           numColors = parseColors contents, gist, gcolorHash
           colorScales gapiHash, gcolorHash
-          console.log gist.id, fileName, numApis, numColors
+          #console.log gist.id, fileName, numApis, numColors
           return fileCb()
         else if ext in ['.tsv', '.csv']
           # pull out # of rows and # of columns
           return fileCb()
         else if ext in ['.css']
           numColors = parseColors contents, gist, gcolorHash
-          console.log gist.id, fileName, 0, numColors
+          #console.log gist.id, fileName, 0, numColors
           return fileCb()
         else
-          console.log gist.id, fileName
+          #console.log gist.id, fileName
           return fileCb()
     else
       return fileCb()
@@ -265,7 +295,9 @@ gistParser = (gist, gistCb) ->
       gist.colors = gcolorHash
       colorBlocks.push pruneColors(gist)
       colorBlocksMin.push pruneColorsMin(gist)
-    #console.log "GAPI HASH", gapiHash
+    # if Object.keys(glibHash).length > 0
+    #   gist.libs = glibHash
+
     #delete gist.files
     if gist.files["thumbnail.png"]
       gist.thumbnail = gist.files["thumbnail.png"].raw_url
