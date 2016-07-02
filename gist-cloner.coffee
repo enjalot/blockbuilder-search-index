@@ -68,8 +68,10 @@ gistCloner = (gist, gistCb) ->
       return gistCb()
     #shell.exec 'git clone https://' + token + '@gist.github.com/' + gist.id, (code, huh, message) ->
     shell.exec "cd #{userfolder};git clone git@gist.github.com:#{gist.id}", (code, huh, message) ->
-      #console.log "code, message", gist.id, code, message
-      console.log "cloned #{gist.id} into #{user}'s folder'"
+      if code or message
+        console.log gist.id, user, code, message
+      else
+        console.log "cloned #{gist.id} into #{user}'s folder'"
       setTimeout ->
         gistCb()
       , 250 + Math.random() * 500
