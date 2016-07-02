@@ -48,22 +48,33 @@ gistCloner = (gist, gistCb) ->
   return gistCb() if singleId && (gist.id != singleId)
   token = require('./config.js').github.token
   #console.log("token", token)
-  folder = base + gist.id
-  shell.cd(base)
+  if gist.owner
+    user = gist.owner.login
+  else
+    user = 'anonymous'
+
+  userfolder = base + user
+  folder = userfolder + '/' + gist.id
+  fs.mkdir userfolder, ->
+
+  #shell.cd(userfolder)
   # TODO don't use token in clone url (git init; git pull with token)
   #fs.lstat folder + "/.git", (err, stats) ->
   fs.lstat folder, (err, stats) ->
+    # TODO check for files?
     if stats && stats.isDirectory()
       console.log "already got", gist.id
       # we want to be able to pull recently modified gists
       return gistCb()
     #shell.exec 'git clone https://' + token + '@gist.github.com/' + gist.id, (code, huh, message) ->
-    shell.exec 'git clone git@gist.github.com:' + gist.id, (code, huh, message) ->
-      console.log "code, message", gist.id, code, message
+    shell.exec "cd #{userfolder};git clone git@gist.github.com:#{gist.id}", (code, huh, message) ->
+      #console.log "code, message", gist.id, code, message
+      console.log "cloned #{gist.id} into #{user}'s folder'"
       setTimeout ->
         gistCb()
       , 250 + Math.random() * 500
 
+gistPuller = (gist, gistCb) ->
 ###
 # TODO: pull inside existing repositories
 console.log("exists, pulling", gist.id)
@@ -97,3 +108,4 @@ if require.main == module
     async.each gistMeta, gistCloner, done
   else
     async.eachLimit gistMeta, 5, gistCloner, done
+    #async.eachSeries gistMeta, gistCloner, done
