@@ -28,6 +28,8 @@ colorBlocksMin = []
 libHash = {}
 libBlocks = []
 
+moduleHash = {}
+
 # number of missing files
 missing = 0
 
@@ -70,7 +72,7 @@ categories = Object.keys(categoryColors)
 
 
 done = (err) ->
-  console.log "done", apiHash
+  console.log "done"#, apiHash
   console.log "skipped #{missing} missing files"
   fs.writeFileSync "data/parsed/apis.json", JSON.stringify(apiHash)
   fs.writeFileSync "data/parsed/colors.json", JSON.stringify(colorHash)
@@ -85,6 +87,11 @@ done = (err) ->
   Object.keys(libHash).forEach (lib) ->
     libcsv += lib + "," + libHash[lib] + "\n"
   fs.writeFileSync("data/parsed/libs.csv", libcsv)
+
+  modulescsv = "module,count\n"
+  Object.keys(moduleHash).forEach (module) ->
+    modulescsv += module + "," + moduleHash[module] + "\n"
+  fs.writeFileSync("data/parsed/modules.csv", modulescsv)
 
   console.log "err", err if err
   console.log "wrote #{apiBlocks.length} API blocks"
@@ -244,6 +251,44 @@ parseLibs = (code, gist, glibHash) ->
     libHash[script]++
   return 0
 
+parseD3Version = (code) ->
+  scripts = parseScriptTags(code)
+  version = "NA"
+  scripts.forEach (script) ->
+    if script.indexOf("d3.v2") >= 0
+      version = "v2"
+    else if script.indexOf("d3/3.") >= 0 or script.indexOf("d3.v3") >= 0
+      version = "v3"
+    else if script.indexOf("d3.v4") >= 0
+      version = "v4"
+    else if script.indexOf("d3.js") >= 0 or script.indexOf("d3.min.js") >=0
+      # we know this is some sort of d3 but not which version
+      if version == "NA"
+        version = "IDK"
+  #console.log version
+  return version
+
+
+parseD3Modules = (code, gist, gmoduleHash) ->
+  # finds anything with the pattern d3-*. e.g. d3-legend.js or d3-transition.v1.min.js
+  # TODO:
+  # d3.geo.projection/raster/tile/polyhedron
+  # d3.tip
+  scripts = parseScriptTags(code)
+  scripts.forEach (script) ->
+    re = /(d3-[a-z]*?)\./
+    #module = script.match(re)
+    matches = re.exec(script)
+    return unless matches and matches.length
+    module = matches[1]
+    console.log module
+    #console.log script
+    moduleHash[module] = 0 unless moduleHash[module]
+    moduleHash[module]++
+    gmoduleHash[module] = 0 unless gmoduleHash[module]
+    gmoduleHash[module]++
+  return 0
+
 
 gistParser = (gist, gistCb) ->
   #console.log "NOT RETURNING", gist.id, singleId
@@ -252,6 +297,7 @@ gistParser = (gist, gistCb) ->
   # per-gist cache of api functions that we build up in place
   gapiHash = {}
   glibHash = {}
+  gmoduleHash = {}
   gcolorHash = {}
   folder = __dirname + "/" + "data/gists-files/" + gist.id
   fs.mkdir folder, ->
@@ -267,8 +313,11 @@ gistParser = (gist, gistCb) ->
       fs.readFile file, (err, data) ->
         return fileCb() unless data
         contents = data.toString()
-        if ext == ".html"
+        if fileName == "index.html"
           numLibs = parseLibs contents, gist, glibHash
+          version = parseD3Version contents
+          modules = parseD3Modules contents, gist, gmoduleHash
+          gist.d3version = version
         if ext in [".html", ".js", ".coffee"]
           numApis = parseApi contents, gist, gapiHash
           numColors = parseColors contents, gist, gcolorHash
@@ -291,6 +340,8 @@ gistParser = (gist, gistCb) ->
     if Object.keys(gapiHash).length > 0
       gist.api = gapiHash
       apiBlocks.push pruneApi(gist)
+    if Object.keys(gmoduleHash).length > 0
+      gist.d3modules = gmoduleHash
     if Object.keys(gcolorHash).length > 0
       gist.colors = gcolorHash
       colorBlocks.push pruneColors(gist)
@@ -306,7 +357,7 @@ gistParser = (gist, gistCb) ->
     return gistCb()
 
 
-module.exports = { api: parseApi, colors: parseColors, colorScales }
+module.exports = { api: parseApi, colors: parseColors, colorScales, d3version: parseD3Modules, d3modules: parseD3Version }
 
 if require.main == module
   async.eachLimit gistMeta, 100, gistParser, done
