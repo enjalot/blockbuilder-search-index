@@ -66,8 +66,13 @@ gistCloner = (gist, gistCb) ->
       console.log "already got", gist.id
       # we want to be able to pull recently modified gists
       return gistCb()
-    #shell.exec 'git clone https://' + token + '@gist.github.com/' + gist.id, (code, huh, message) ->
-    shell.exec "cd #{userfolder};git clone git@gist.github.com:#{gist.id}", (code, huh, message) ->
+
+    if(token)
+      cmd = "cd #{userfolder};git clone https://#{token}@gist.github.com/#{gist.id}"
+    else
+      cmd = "cd #{userfolder};git clone git@gist.github.com:#{gist.id}"
+
+    shell.exec cmd, (code, huh, message) ->
       if code or message
         console.log gist.id, user, code, message
       else
