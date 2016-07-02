@@ -51,7 +51,7 @@ if require.main == module
 
 
   limit = 20
-  console.log "SHOWING #{limit} of #{userCounts.length} users"
+  console.log "SHOWING #{limit} of #{userCounts.length} users, with #{gistMeta.length} blocks total"
   users = Object.keys(usersHash).map (username) -> usersHash[username]
   users.sort (a,b) ->
     return b.count - a.count
