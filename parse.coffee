@@ -190,8 +190,8 @@ parseApi = (code, gist, gapiHash) ->
   apis = parseD3Functions(code)
   apis.forEach (api) ->
     api = api.slice(0, api.length-1)
-    apiHash[api] = 0 unless apiHash[api]
-    apiHash[api]++
+    #apiHash[api] = 0 unless apiHash[api]
+    #apiHash[api]++
     gapiHash[api] = 0 unless gapiHash[api]
     gapiHash[api]++
   return apis.length
@@ -202,8 +202,8 @@ colorScales = (gapiHash, gcolorHash) ->
     if gapiHash[cat]
       colors = categoryColors[cat]
       colors.forEach (color) ->
-        colorHash[color] = 0 unless colorHash[color]
-        colorHash[color]++
+        #colorHash[color] = 0 unless colorHash[color]
+        #colorHash[color]++
         gcolorHash[color] = 0 unless gcolorHash[color]
         gcolorHash[color]++
 
@@ -211,8 +211,8 @@ addColors = (code, re, gcolorHash) ->
   matches = code.match(re) or []
   matches.forEach (str) ->
     color = d3.rgb(str).toString().toLowerCase()
-    colorHash[color] = 0 unless colorHash[color]
-    colorHash[color]++
+    #colorHash[color] = 0 unless colorHash[color]
+    #colorHash[color]++
     gcolorHash[color] = 0 unless gcolorHash[color]
     gcolorHash[color]++
 
@@ -247,20 +247,20 @@ parseLibs = (code, gist, glibHash) ->
   scripts = parseScriptTags(code)
   scripts.forEach (script) ->
     #console.log script
-    libHash[script] = 0 unless libHash[script]
-    libHash[script]++
+    #libHash[script] = 0 unless libHash[script]
+    #libHash[script]++
   return 0
 
 parseD3Version = (code) ->
   scripts = parseScriptTags(code)
   version = "NA"
   scripts.forEach (script) ->
-    if script.indexOf("d3.v2") >= 0
-      version = "v2"
+    if script.indexOf("d3.v4") >= 0
+      version = "v4"
     else if script.indexOf("d3/3.") >= 0 or script.indexOf("d3.v3") >= 0
       version = "v3"
-    else if script.indexOf("d3.v4") >= 0
-      version = "v4"
+    if script.indexOf("d3.v2") >= 0
+      version = "v2"
     else if script.indexOf("d3.js") >= 0 or script.indexOf("d3.min.js") >=0
       # we know this is some sort of d3 but not which version
       if version == "NA"
@@ -269,7 +269,7 @@ parseD3Version = (code) ->
   return version
 
 
-parseD3Modules = (code, gist, gmoduleHash) ->
+parseD3Modules = (code, gmoduleHash) ->
   # finds anything with the pattern d3-*. e.g. d3-legend.js or d3-transition.v1.min.js
   # TODO:
   # d3.geo.projection/raster/tile/polyhedron
@@ -281,18 +281,20 @@ parseD3Modules = (code, gist, gmoduleHash) ->
     matches = re.exec(script)
     return unless matches and matches.length
     module = matches[1]
-    console.log module
+    #console.log module
     #console.log script
-    moduleHash[module] = 0 unless moduleHash[module]
-    moduleHash[module]++
+    #moduleHash[module] = 0 unless moduleHash[module]
+    #moduleHash[module]++
     gmoduleHash[module] = 0 unless gmoduleHash[module]
     gmoduleHash[module]++
   return 0
 
 
+i = 0
 gistParser = (gist, gistCb) ->
   #console.log "NOT RETURNING", gist.id, singleId
-  console.log gist.id
+  i++
+  console.log i, gist.id
   fileNames = Object.keys gist.files
   # per-gist cache of api functions that we build up in place
   gapiHash = {}
@@ -314,11 +316,13 @@ gistParser = (gist, gistCb) ->
         return fileCb() unless data
         contents = data.toString()
         if fileName == "index.html"
+          # TODO copy glibHash -> libHash etc for each of these
           numLibs = parseLibs contents, gist, glibHash
           version = parseD3Version contents
-          modules = parseD3Modules contents, gist, gmoduleHash
+          modules = parseD3Modules contents, gmoduleHash
           gist.d3version = version
         if ext in [".html", ".js", ".coffee"]
+          # TODO copy gapiHash -> apiHash etc for each of these
           numApis = parseApi contents, gist, gapiHash
           numColors = parseColors contents, gist, gcolorHash
           colorScales gapiHash, gcolorHash
@@ -357,7 +361,7 @@ gistParser = (gist, gistCb) ->
     return gistCb()
 
 
-module.exports = { api: parseApi, colors: parseColors, colorScales, d3version: parseD3Modules, d3modules: parseD3Version }
+module.exports = { api: parseApi, colors: parseColors, colorScales, d3version: parseD3Version, d3modules: parseD3Modules }
 
 if require.main == module
   async.eachLimit gistMeta, 100, gistParser, done

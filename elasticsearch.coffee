@@ -36,6 +36,8 @@ pruneES = (gist) ->
     created_at: gist.created_at
     updated_at: gist.updated_at
     api: Object.keys(gist.api || {})
+    d3version: gist.d3version
+    d3modules: Object.keys(gist.d3modules || {})
     colors: Object.keys(gist.colors || {})
     #tags: gist.tags || []
     #files:
@@ -60,13 +62,18 @@ pruneES = (gist) ->
 
 
 processed = 0
+i = 0
 gistParser = (gist, gistCb) ->
   #console.log "NOT RETURNING", gist.id, singleId
+  #console.log "gist", gist.id
+  i += 1
+  index = i + 0
   return setImmediate(gistCb) if not gist?.files
   fileNames = Object.keys gist.files
   # per-gist cache of api functions that we build up in place
   gapiHash = {}
   gcolorHash = {}
+  gmoduleHash = {}
   folder = __dirname + "/" + "data/gists-files/" + gist.id
 
   async.each fileNames, (fileName, fileCb) ->
@@ -78,6 +85,9 @@ gistParser = (gist, gistCb) ->
         contents = data.toString()
         # save the string back on the file
         gist.files[fileName].content = contents
+        if fileName.toLowerCase() == "index.html"
+          gist.d3version = parse.d3version(contents)
+          parse.d3modules(contents, gmoduleHash)
         if ext in [".html", ".js", ".coffee"]
           numApis = parse.api contents, gist, gapiHash
           numColors = parse.colors contents, gist, gcolorHash
@@ -116,6 +126,9 @@ gistParser = (gist, gistCb) ->
     if Object.keys(gcolorHash).length > 0
       gist.colors = gcolorHash
 
+    if Object.keys(gmoduleHash).length > 0
+      gist.d3modules = gmoduleHash
+
     if gist.files["thumbnail.png"]
       gist.thumbnail = gist.files["thumbnail.png"].raw_url
     if gist.files["preview.png"]
@@ -150,10 +163,10 @@ gistParser = (gist, gistCb) ->
             id: gist.id
             body: es
           , (err) ->
-            console.log "indexed~", gist.id
+            console.log "indexed~", index, gist.id
             return gistCb(err)
         else
-          console.log "already", gist.id
+          console.log "already", index, gist.id
           setTimeout ->
             return gistCb()
           , Math.random() * 50 + 50
@@ -165,7 +178,7 @@ gistParser = (gist, gistCb) ->
         id: gist.id
         body: es
       , (err) ->
-        console.log "indexed", gist.id
+        console.log "indexed", index, gist.id
         setTimeout ->
           return gistCb(err)
         , Math.random() * 50 + 50
@@ -197,5 +210,5 @@ if require.main == module
   # when trying to do all 11k at once. I realized I could skip ones
   # already indexed by slicing the array past whats already been indexed
   # (gist-meta is an ordered array, new gists are appended to it)
-  #async.eachLimit gistMeta.slice(8500), 20, gistParser, done
-  async.eachLimit gistMeta, 20, gistParser, done
+  async.eachLimit gistMeta.slice(7670), 20, gistParser, done
+  #async.eachLimit gistMeta, 20, gistParser, done

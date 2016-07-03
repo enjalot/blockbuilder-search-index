@@ -5,6 +5,7 @@ Should be able to summarize by user as well
 
 fs = require 'fs'
 d3 = require 'd3'
+Table = require('cli-table')
 
 base = __dirname + "/data/gists-clones/"
 
@@ -35,7 +36,13 @@ countClonedGistsForUser = (user) ->
     return 0
 
 
+percent = (num, den) ->
+  p = num/den * 100
+  p = Math.round(p * 100)/100
+  return p + "%"
 
+
+  
 if require.main == module
   # specify the file that lists the gists we want to analyze
   metaFile = process.argv[2] || 'data/gist-meta.json'
@@ -53,20 +60,21 @@ if require.main == module
   limit = 20
   console.log "SHOWING #{limit} of #{userCounts.length} users, with #{gistMeta.length} blocks total"
   users = Object.keys(usersHash).map (username) -> usersHash[username]
+  count = 0
+  clones = 0
+  users.forEach (user) ->
+    count += user.count
+    clones += user.clones
+  console.log "#{percent(clones,count)}% cloned with #{clones}/#{count}"
+
   users.sort (a,b) ->
     return b.count - a.count
-
-  Table = require('cli-table')
 
   table = new Table({
       head: ['login', 'percent', 'count', 'clones']
     #, colWidths: [150, 50, 50]
   })
 
-  percent = (num, den) ->
-    p = num/den * 100
-    p = Math.round(p * 100)/100
-    return p + "%"
 
   users.slice(0,limit).forEach (u) ->
     table.push [u.login, percent(u.clones, u.count), u.count, u.clones]
