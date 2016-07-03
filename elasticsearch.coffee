@@ -20,6 +20,7 @@ missing = 0
 # we may want to check if a document is in ES before trying to write it
 # this can help us avoid overloading the server with writes when reindexing
 skip = false
+offset = 0
 
 done = (err) ->
   console.log "done"
@@ -69,12 +70,14 @@ gistParser = (gist, gistCb) ->
   i += 1
   index = i + 0
   return setImmediate(gistCb) if not gist?.files
+  return setImmediate(gistCb) if not gist?.owner
   fileNames = Object.keys gist.files
   # per-gist cache of api functions that we build up in place
   gapiHash = {}
   gcolorHash = {}
   gmoduleHash = {}
-  folder = __dirname + "/" + "data/gists-files/" + gist.id
+  #folder = __dirname + "/" + "data/gists-files/" + gist.id
+  folder = __dirname + "/data/gists-clones/#{gist.owner.login}/#{gist.id}"
 
   async.each fileNames, (fileName, fileCb) ->
     ext = path.extname(fileName).toLowerCase()
@@ -163,10 +166,10 @@ gistParser = (gist, gistCb) ->
             id: gist.id
             body: es
           , (err) ->
-            console.log "indexed~", index, gist.id
+            console.log "indexed~", offset+index, gist.id
             return gistCb(err)
         else
-          console.log "already", index, gist.id
+          console.log "already", offset+index, gist.id
           setTimeout ->
             return gistCb()
           , Math.random() * 50 + 50
@@ -178,7 +181,7 @@ gistParser = (gist, gistCb) ->
         id: gist.id
         body: es
       , (err) ->
-        console.log "indexed", index, gist.id
+        console.log "indexed", offset+index, gist.id
         setTimeout ->
           return gistCb(err)
         , Math.random() * 50 + 50
@@ -201,6 +204,7 @@ if require.main == module
   # specify the file to load, will probably be data/latest.json for our cron job
   metaFile = process.argv[2] || __dirname + '/data/gist-meta.json'
   skip = true if process.argv[3] == "skip"
+  offset = +process.argv[4] or 0
 
   # read in the list of gist metadata
   gistMeta = JSON.parse fs.readFileSync(metaFile).toString()
@@ -210,5 +214,5 @@ if require.main == module
   # when trying to do all 11k at once. I realized I could skip ones
   # already indexed by slicing the array past whats already been indexed
   # (gist-meta is an ordered array, new gists are appended to it)
-  async.eachLimit gistMeta.slice(7670), 20, gistParser, done
+  async.eachLimit gistMeta.slice(offset), 20, gistParser, done
   #async.eachLimit gistMeta, 20, gistParser, done

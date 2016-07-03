@@ -55,8 +55,24 @@ coffee gist-meta.coffee data/new.json '' 'new-users'
 
 [`data/gist-meta.json`](data/gist-meta.json) is kept up-to-date manually and checked in to the [blockbuilder-search-index](https://github.com/enjalot/blockbuilder-search-index) repository. When deployed, this code uses `data/gist-meta.json` to bootstrap the search index. After deployment, [cronjobs](https://en.wikipedia.org/wiki/Cron) will create [`data/latest.json`](data/latest.json) every 15 minutes. Later in the pipeline, we use [`data/latest.json`](data/latest.json) to index the gists in [Elasticsearch](https://www.elastic.co/products/elasticsearch).
 
-### Gist content
-The second step in the process is to download the contents of each gist via a GitHub [raw urls](http://stackoverflow.com/a/4605068/1732222) and save the files to disk in `data/gists-files/`. We selectively download files of certain types
+
+### Gist clones
+The second step in the process is to download the contents of each gist via a GitHub [raw urls](http://stackoverflow.com/a/4605068/1732222) and save the files to disk in `data/gists-clones/`.
+The gists for each user are cloned into a folder with their username.
+
+```shell
+# default, will download all the files found in data/gist-meta.json
+coffee gist-cloner.coffee
+# specify file with list of gists
+coffee gist-cloner.coffee data/latest.json
+# TODO: a command/process to pull the latest commits in all the repos
+# TODO: a command to clone/pull the latest for a given user
+```
+
+### Gist content (deprecated)
+Previously, the second step in the process was to download the contents of each gist via a GitHub [raw urls](http://stackoverflow.com/a/4605068/1732222) and save the files to disk in `data/gists-files/`.
+We now clone because it is a better way to keep our index up to date, and the saved space is negligable.
+We selectively download files of certain types
 
 [`gist-content.coffee`](gist-content.coffee):
 

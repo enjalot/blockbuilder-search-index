@@ -65,21 +65,29 @@ gistCloner = (gist, gistCb) ->
     if stats && stats.isDirectory()
       console.log "already got", gist.id
       # we want to be able to pull recently modified gists
-      return gistCb()
-
-    if(token)
-      cmd = "cd #{userfolder};git clone https://#{token}@gist.github.com/#{gist.id}"
+      cmd = "cd #{userfolder}/#{gist.id}; git pull origin master"
+      shell.exec cmd, (code, huh, message) ->
+        if code or message
+          console.log gist.id, user, code, message
+        else
+          console.log "pulled #{gist.id} into #{user}'s folder'"
+        setTimeout ->
+          return gistCb()
+        , 250 + Math.random() * 500
     else
-      cmd = "cd #{userfolder};git clone git@gist.github.com:#{gist.id}"
-
-    shell.exec cmd, (code, huh, message) ->
-      if code or message
-        console.log gist.id, user, code, message
+      if(token)
+        cmd = "cd #{userfolder};git clone https://#{token}@gist.github.com/#{gist.id}"
       else
-        console.log "cloned #{gist.id} into #{user}'s folder'"
-      setTimeout ->
-        gistCb()
-      , 250 + Math.random() * 500
+        cmd = "cd #{userfolder};git clone git@gist.github.com:#{gist.id}"
+
+      shell.exec cmd, (code, huh, message) ->
+        if code or message
+          console.log gist.id, user, code, message
+        else
+          console.log "cloned #{gist.id} into #{user}'s folder'"
+        setTimeout ->
+          gistCb()
+        , 250 + Math.random() * 500
 
 gistPuller = (gist, gistCb) ->
 ###
@@ -99,6 +107,8 @@ if require.main == module
   # specify the file to load, will probably be data/latest.json for our cron job
   metaFile = process.argv[2] || 'data/gist-meta.json'
 
+  username = process.argv[3] || ""
+
   # optionally pass in a csv file or a single id to be downloaded
   param = process.argv[4]
   if param
@@ -110,9 +120,15 @@ if require.main == module
       console.log "doing content for single block", singleId
 
   gistMeta = JSON.parse fs.readFileSync(metaFile).toString()
-  console.log "number of gists", gistMeta.length
+  if username
+    list = gistMeta.filter (d) -> return d.owner.login == username
+  else
+    list = gistMeta
+
+
+  console.log "number of gists", list.length
   if singleId or ids
     async.each gistMeta, gistCloner, done
   else
-    async.eachLimit gistMeta, 5, gistCloner, done
+    async.eachLimit list, 5, gistCloner, done
     #async.eachSeries gistMeta, gistCloner, done

@@ -206,6 +206,7 @@ colorScales = (gapiHash, gcolorHash) ->
         #colorHash[color]++
         gcolorHash[color] = 0 unless gcolorHash[color]
         gcolorHash[color]++
+  return 0
 
 addColors = (code, re, gcolorHash) ->
   matches = code.match(re) or []
@@ -215,6 +216,7 @@ addColors = (code, re, gcolorHash) ->
     #colorHash[color]++
     gcolorHash[color] = 0 unless gcolorHash[color]
     gcolorHash[color]++
+  return 0
 
 
 parseColors = (code, gist, gcolorHash) ->
@@ -235,7 +237,10 @@ parseColors = (code, gist, gcolorHash) ->
 
 
 parseScriptTags = (code) ->
-  re = new RegExp /<script.*?src=[\"\'](.*?\/\/.+?)[\"\'].*?>/g
+  # anything with a // in it (signifiying url...)
+  #re = new RegExp /<script.*?src=[\"\'](.*?\/\/.+?)[\"\'].*?>/g
+  # anything with a .js in it
+  re = new RegExp /<script.*?src=[\"\'](.*?\.js.*?)[\"\'].*?>/g
   matches = []
   match = re.exec(code)
   while match != null
