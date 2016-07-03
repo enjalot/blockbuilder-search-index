@@ -7,7 +7,8 @@ var bodyParser = require('body-parser')
 var config = require('./config.js')
 
 require('coffee-script/register')
-var content = require('./gist-content')
+//var content = require('./gist-content')
+var cloner = require('./gist-cloner')
 var es = require('./elasticsearch')
 var gh = require('./github')
 
@@ -23,7 +24,8 @@ app.get('/index/gist/:gistId', function(req, res) {
     gh.getGist(gistId, function(err, response, body){
       if(err) return console.log(gistId, err)
       var gist = JSON.parse(body)
-      content.gistFetcher(gist, function(err) {
+      //content.gistFetcher(gist, function(err) {
+      cloner.gistCloner(gist, function(err) {
         es.gistParser(gist, function(err) {
           return;
         })
