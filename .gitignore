@@ -1,5 +1,6 @@
 config.js
 node_modules/
+data/gist-meta.json
 data/gists/
 data/gists-clones/
 data/gists-files/
