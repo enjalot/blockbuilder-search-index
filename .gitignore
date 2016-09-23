@@ -1,11 +1,14 @@
 config.js
 node_modules/
 data/gist-meta.json
+data/new.json
+data/parsed/
 data/gists/
 data/gists-clones/
 data/gists-files/
 data/gists.zip
 data/gists-files.zip
 data/gists-files.tar.gz
+data/parsed.tar.gz
 data/latest.json
 .DS_Store
