@@ -113,9 +113,19 @@ I wanted a script that would take in a list of block URLS and give me a subset o
 coffee gallery.coffee data/unconf.csv data/out.json
 ```
 
-## [Elasticsearch](https://www.elastic.co/products/elasticsearch)
+## Setup Elasticsearch & Index some Gists
 
-Once you have a list of gists (either [`data/gist-meta.json`](data/gist-meta.json), `data/latest.json` or otherwise) and you've downloaded the content to `data/gist-files/` you can index the gists to [Elasticsearch](https://www.elastic.co/products/elasticsearch):  
+Once you have a list of gists (either [`data/gist-meta.json`](data/gist-meta.json), `data/latest.json` or otherwise) and you've downloaded the content to `data/gist-files/` you can index the gists to Elasticsearch: 
+
+first, [download Elasticsearch](https://www.elastic.co/downloads/elasticsearch) and follow the installation steps listed on the download page.
+
+from the unzipped elasticsearch directory, start a local elasticsearch instance:
+
+```
+bin/elasticsearch
+```
+
+then, run the indexing script from the `blockbuilder-search-index` directory:
 
 ```shell
 coffee elasticsearch.coffee
