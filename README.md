@@ -133,6 +133,16 @@ coffee elasticsearch.coffee
 coffee elasticsearch.coffee data/latest.json
 ```
 
+if you see a `JavaScript heap out of memory` errror, then the `nodejs` process invoked by Coffeescript ran out of memory.  to fix this error and index all of the blocks in one go, increase the amount of memory available to `nodejs`
+
+with the argument `--nodejs --max-old-space-size=8000`
+
+if we use this argument, then the whole command becomes:
+
+```
+coffee --nodejs --max-old-space-size=8000 elasticsearch.coffee
+```
+
 I then deploy this on a server with cronjobs. See the [example crontab](https://github.com/enjalot/blockbuilder-search-index/blob/master/deploy/crontab)
 
 ### RPC host
