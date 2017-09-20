@@ -117,22 +117,31 @@ coffee gallery.coffee data/unconf.csv data/out.json
 
 Once you have a list of gists (either [`data/gist-meta.json`](data/gist-meta.json), `data/latest.json` or otherwise) and you've downloaded the content to `data/gist-files/` you can index the gists to Elasticsearch: 
 
-first, [download Elasticsearch](https://www.elastic.co/downloads/elasticsearch) and follow the installation steps listed on the download page.
+download [Elasticsearch 2.3.4](https://www.elastic.co/downloads/past-releases/elasticsearch-2-3-4) 
 
-from the unzipped elasticsearch directory, start a local elasticsearch instance:
+unzip `elasticsearch-2.3.4.zip` and run a local Elasticsearch instance:
 
-```
+```shell
+cd ~/Downloads
+unzip elasticsearch-2.3.4.zip
+cd elasticsearch-2.3.4
 bin/elasticsearch
 ```
 
 then, run the indexing script from the `blockbuilder-search-index` directory:
 
 ```shell
+cd blockbuilder-search-index
 coffee elasticsearch.coffee
+```
+
+you can also choose to only index gists listed in a file that you specify, like this:
+
+```shell
+cd blockbuilder-search-index
 # index from a specific file
 coffee elasticsearch.coffee data/latest.json
 ```
-
 if you see a `JavaScript heap out of memory` errror, then the `nodejs` process invoked by Coffeescript ran out of memory.  to fix this error and index all of the blocks in one go, increase the amount of memory available to `nodejs`
 
 with the argument `--nodejs --max-old-space-size=8000`
@@ -140,8 +149,11 @@ with the argument `--nodejs --max-old-space-size=8000`
 if we use this argument, then the whole command becomes:
 
 ```
+cd blockbuilder-search-index
 coffee --nodejs --max-old-space-size=8000 elasticsearch.coffee
 ```
+
+### Deployment
 
 I then deploy this on a server with cronjobs. See the [example crontab](https://github.com/enjalot/blockbuilder-search-index/blob/master/deploy/crontab)
 
