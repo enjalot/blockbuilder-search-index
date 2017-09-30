@@ -1,0 +1,22 @@
+{
+  "name": "blockbuilder-search-index-gcp",
+  "version": "0.0.1",
+  "description": "Google Cloud specific indexing scripts",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/enjalot/blockbuilder-search-index.git"
+  },
+  "author": "",
+  "license": "BSD3",
+  "bugs": {
+    "url": "https://github.com/enjalot/blockbuilder-search-index/issues"
+  },
+  "homepage": "https://github.com/enjalot/blockbuilder-search-index#readme",
+  "dependencies": {
+    "@google-cloud/datastore": "^1.1.0"
+  }
+}
