@@ -1,0 +1,10 @@
+// generate application tokens at https://github.com/settings/applications/new
+module.exports = {
+  github: {
+    // needed to access the GitHub API
+    clientId: 'XXX',
+    secret: 'XXX',
+    // personal access token for making auth'd clones. don't give this token any permissions, not needed
+    token: 'XXX'
+  }
+};

@@ -1,0 +1,16 @@
+{
+  "name": "cf-process-users",
+  "version": "1.0.0",
+  "description": "cloud function for processing blocks from github users",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "async": "^2.5.0",
+    "moment": "^2.18.1",
+    "request": "^2.83.0"
+  }
+}
