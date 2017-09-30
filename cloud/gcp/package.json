@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/enjalot/blockbuilder-search-index#readme",
   "dependencies": {
-    "@google-cloud/datastore": "^1.1.0"
+    "@google-cloud/datastore": "^1.1.0",
+    "async": "^2.5.0",
+    "d3": "^4.10.2"
   }
 }

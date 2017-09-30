@@ -42,7 +42,7 @@ let blocksStr = fs
 const blocksLinks = d3.tsv.parse(blocksStr);
 blocksLinks.forEach(function(d) {
   const username = parseBlockURL(d.url);
-  return (userHash[username] = 1);
+  return (userHash[username] = 'stackoverflow');
 });
 
 const blocksusers = Object.keys(userHash).length;
@@ -58,7 +58,7 @@ blocksStr = fs
 const blocksLinks2 = d3.csv.parse(blocksStr);
 blocksLinks2.forEach(function(d) {
   const username = parseBlockURL(d.url);
-  return (userHash[username] = 1);
+  return (userHash[username] = 'knight');
 });
 const blocksusers2 = Object.keys(userHash).length;
 total += blocksusers2;
@@ -75,7 +75,7 @@ string.split('\n').forEach(function(userStr) {
     if (!(user != null ? user.login : undefined)) {
       return;
     }
-    return (userHash[user.login] = 1);
+    return (userHash[user.login] = 'blockbuilder');
   } catch (e) {}
 });
 
@@ -94,7 +94,7 @@ d3.csv.parse(userscsv, function(user) {
   if (!username) {
     return;
   }
-  return (userHash[username] = 1);
+  return (userHash[username] = 'manual');
 });
 
 const csvusers = Object.keys(userHash).length - total;
@@ -115,7 +115,7 @@ request.get(userDoc, function(err, response, body) {
     if (!username) {
       return;
     }
-    return (userHash[username] = 1);
+    return (userHash[username] = 'blocksplorer');
   });
 
   let usernames = Object.keys(userHash);
@@ -123,8 +123,11 @@ request.get(userDoc, function(err, response, body) {
   total += usernames.length - total;
   console.log(`${usernames.length} users total`);
   usernames = usernames.sort();
+  let rows = usernames.map(function(u) {
+    return u + "," + userHash[u]
+  })
 
-  const users = `username\n${usernames.join('\n')}`;
+  const users = `username,source\n${rows.join('\n')}`;
 
   return fs.writeFileSync('data/users-combined.csv', users);
 });
