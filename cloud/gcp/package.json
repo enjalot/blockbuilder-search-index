@@ -11,7 +11,7 @@
     "url": "git+https://github.com/enjalot/blockbuilder-search-index.git"
   },
   "author": "",
-  "license": "BSD3",
+  "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/enjalot/blockbuilder-search-index/issues"
   },
