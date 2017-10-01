@@ -71,6 +71,8 @@ coffee gist-cloner.coffee data/latest.json
 ```
 
 ### Gist content (deprecated)
+<details>
+  <summary>deprecated instructions</summary>
 Previously, the second step in the process was to download the contents of each gist via a GitHub [raw urls](http://stackoverflow.com/a/4605068/1732222) and save the files to disk in `data/gists-files/`.
 We now clone because it is a better way to keep our index up to date, and the saved space is negligable.
 We selectively download files of certain types
@@ -91,6 +93,7 @@ coffee gist-content.coffee data/latest.json
 # skip existing files (saves time, might miss updates)
 coffee gist-content.coffee data/gist-meta.json skip
 ```
+</details>
 
 ### Flat data files
 We can generate a series of JSON files that pull out interesting metadata from the downloaded gists.  
