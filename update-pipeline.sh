@@ -41,7 +41,13 @@ coffee combine-users.coffee
 # fetch the metadata for all new gists
 # for all known users from the github API
 #
-coffee gist-meta.coffee data/latest-after-20180314.json $UPDATE_AFTER_TIMESTAMP
+#
+# TODO: inside gist-meta script handle case were github 
+# API allocaton runs out before metadata is fetched for all users
+# fixing this is required to run the whole pipeline in sequence, 
+# in autonomous mode
+#
+coffee gist-meta.coffee data/latest-20180314-to-20180820.json $UPDATE_AFTER_TIMESTAMP
 # x-ratelimit-remaining: 4652
 # done with yonester, found 5 gists
 # x-ratelimit-remaining: 4651
@@ -97,20 +103,57 @@ coffee gist-meta.coffee data/latest-after-20180314.json $UPDATE_AFTER_TIMESTAMP
 #
 # let's clone the gists we just found
 #
-coffee gist-cloner.coffee data/latest-after-20180119.json
-# From https://gist.github.com/9893056
+coffee gist-cloner.coffee data/latest-20180314-to-20180820.json
+# From https://gist.github.com/cec274f418b8675efaead3a56a5b324b
 #  * branch            master     -> FETCH_HEAD
 # Already up-to-date.
-# 9893056 zross 0 From https://gist.github.com/9893056
+# cec274f418b8675efaead3a56a5b324b yonicd 0 From https://gist.github.com/cec274f418b8675efaead3a56a5b324b
 #  * branch            master     -> FETCH_HEAD
 #
-# From https://gist.github.com/280cb98c8e49d05181cd
+# From https://gist.github.com/4bc59fca901388ebe4905bdb19af1567
 #  * branch            master     -> FETCH_HEAD
 # Already up-to-date.
-# 280cb98c8e49d05181cd zuzap 0 From https://gist.github.com/280cb98c8e49d05181cd
+# 4bc59fca901388ebe4905bdb19af1567 yonicd 0 From https://gist.github.com/4bc59fca901388ebe4905bdb19af1567
 #  * branch            master     -> FETCH_HEAD
 #
 # done writing files
+# Elasticsearch DEBUG: 2018-08-21T13:14:54Z
+#   starting request { method: 'POST',
+#     path: '/bbindexer/scripts',
+#     body:
+#      { script: 'content',
+#        timeouts: [],
+#        filename: 'data/latest-20180314-to-20180820.json',
+#        ranAt: 2018-08-21T13:14:54.063Z },
+#     query: {} }
+#
+#
+# Elasticsearch TRACE: 2018-08-21T13:14:54Z
+#   -> POST http://localhost:9200/bbindexer/scripts
+#   {
+#     "script": "content",
+#     "timeouts": [],
+#     "filename": "data/latest-20180314-to-20180820.json",
+#     "ranAt": "2018-08-21T13:14:54.063Z"
+#   }
+#   <- 201
+#   {
+#     "_index": "bbindexer",
+#     "_type": "scripts",
+#     "_id": "AWVcn7EAo8z7fxr9sXXS",
+#     "_version": 1,
+#     "_shards": {
+#       "total": 2,
+#       "successful": 1,
+#       "failed": 0
+#     },
+#     "created": true
+#   }
+#
+# Elasticsearch DEBUG: 2018-08-21T13:14:54Z
+#   Request complete
+#
+# indexed
 
 coffee parse.coffee
 # 29325 '6be4e60ab26537300a0f7bf3f050fcf6'
