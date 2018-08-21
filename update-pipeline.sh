@@ -156,15 +156,18 @@ coffee gist-cloner.coffee data/latest-20180314-to-20180820.json
 # indexed
 
 coffee parse.coffee
-# 29325 '6be4e60ab26537300a0f7bf3f050fcf6'
-# 29326 'c46227f4e38216113d7635c8b215d3b0'
-# 29327 '05261d94df1e95a02a0a5cd1076803f5'
+# 29419 'a488e022362571a9e1187985df7f47a4'
+# 29420 '8d331f9b5c7dd57908de0db3439ab7ab'
+# 29421 'd1dbded3fe2c8cb94b207904c7c4c73d'
+# 29422 '5b7d24613149e60867c2bf6fe097c587'
+# 29423 '492182b66a0d1a3dd5513ff5b71c900c'
+# 29424 '056046c1f83e3926484bd2e21847341e'
 # done
 # skipped 0 missing files
 # wrote 10445 API blocks
 # wrote 11522 Color blocks
-# wrote 117120 Files blocks
-# wrote 29327 total blocks
+# wrote 117533 Files blocks
+# wrote 29424 total blocks
 
 cd data/parsed
 pwd
@@ -174,17 +177,18 @@ pwd
 # tada, we have some fresh blocks metadata files
 #
 ls -lAFh
-# total 285576
-# -rw-r--r--  1 m  staff     2B Mar 16 17:57 apis.json
-# -rw-r--r--  1 m  staff   3.2M Mar 16 17:57 blocks-api.json
-# -rw-r--r--  1 m  staff   2.2M Mar 16 17:57 blocks-colors-min.json
-# -rw-r--r--  1 m  staff   4.2M Mar 16 17:57 blocks-colors.json
-# -rw-r--r--  1 m  staff   5.9M Mar 16 17:57 blocks-min.json
-# -rw-r--r--  1 m  staff    75M Mar 16 17:57 blocks.json
-# -rw-r--r--  1 m  staff     2B Mar 16 17:57 colors.json
-# -rw-r--r--  1 m  staff    45M Mar 16 17:57 files-blocks.json
-# -rw-r--r--  1 m  staff    10B Mar 16 17:57 libs.csv
-# -rw-r--r--  1 m  staff    13B Mar 16 17:57 modules.csv
+# total 286816
+# -rw-r--r--@ 1 m  staff   6.0K Mar 16 18:10 .DS_Store
+# -rw-r--r--  1 m  staff     2B Aug 21 06:29 apis.json
+# -rw-r--r--  1 m  staff   3.2M Aug 21 06:29 blocks-api.json
+# -rw-r--r--  1 m  staff   2.2M Aug 21 06:29 blocks-colors-min.json
+# -rw-r--r--  1 m  staff   4.2M Aug 21 06:29 blocks-colors.json
+# -rw-r--r--  1 m  staff   5.9M Aug 21 06:29 blocks-min.json
+# -rw-r--r--  1 m  staff    76M Aug 21 06:29 blocks.json
+# -rw-r--r--  1 m  staff     2B Aug 21 06:29 colors.json
+# -rw-r--r--  1 m  staff    45M Aug 21 06:29 files-blocks.json
+# -rw-r--r--  1 m  staff    10B Aug 21 06:29 libs.csv
+# -rw-r--r--  1 m  staff    13B Aug 21 06:29 modules.csv
 # -rw-r--r--  1 m  staff   3.6M Aug 14  2017 readme-blocks-graph.json
 
 #
