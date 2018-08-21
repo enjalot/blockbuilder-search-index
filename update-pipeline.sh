@@ -10,7 +10,10 @@
 #   each command shows a sample of what the terminal output 
 #   should look like if command runs successfully
 
+
 BLOCKBUILDER_SEARCH_INDEX_HOME="/Users/m/workspace/blockbuilder-search-index"
+UPDATE_AFTER_TIMESTAMP="2018-03-14T00:00:00Z"
+
 cd $BLOCKBUILDER_SEARCH_INDEX_HOME
 
 coffee combine-users.coffee
@@ -34,13 +37,62 @@ coffee combine-users.coffee
 # writing 28336 blocks to data/gist-meta.json
 # writing 3147 to data/new.json
 
-coffee gist-meta.coffee data/latest-after-20180119.json 2018-01-19T00:00:00Z
-# x-ratelimit-remaining: 4752
-# done with zuzap, found 1 gists
-# done. number of new gists: 84
-# combining 84 with 29294 existing blocks
-# writing 29327 blocks to data/gist-meta.json
-# writing 84 to data/latest-after-20180119.json
+#
+# fetch the metadata for all new gists
+# for all known users from the github API
+#
+coffee gist-meta.coffee data/latest-after-20180314.json $UPDATE_AFTER_TIMESTAMP
+# x-ratelimit-remaining: 4652
+# done with yonester, found 5 gists
+# x-ratelimit-remaining: 4651
+# x-ratelimit-remaining: undefined
+# done with yifancui, found 34 gists
+# x-ratelimit-remaining: undefined
+# ...
+# done with zzolo, found 0 gists
+# done. number of new gists: 1965
+# combining 1965 with 29327 existing blocks
+# writing 29424 blocks to data/gist-meta.json
+# writing 1965 to data/latest-after-20180314.json
+# Elasticsearch DEBUG: 2018-08-21T12:58:48Z
+#   starting request { method: 'POST',
+#     path: '/bbindexer/scripts',
+#     body:
+#      { script: 'meta',
+#        numBlocks: 1965,
+#        filename: 'data/latest-after-20180314.json',
+#        since: 1970-01-01T00:00:00.000Z,
+#        ranAt: 2018-08-21T12:58:48.304Z },
+#     query: {} }
+#
+#
+# Elasticsearch TRACE: 2018-08-21T12:58:49Z
+#   -> POST http://localhost:9200/bbindexer/scripts
+#   {
+#     "script": "meta",
+#     "numBlocks": 1965,
+#     "filename": "data/latest-after-20180314.json",
+#     "since": "1970-01-01T00:00:00.000Z",
+#     "ranAt": "2018-08-21T12:58:48.304Z"
+#   }
+#   <- 201
+#   {
+#     "_index": "bbindexer",
+#     "_type": "scripts",
+#     "_id": "AWVckPawo8z7fxr9sXXM",
+#     "_version": 1,
+#     "_shards": {
+#       "total": 2,
+#       "successful": 1,
+#       "failed": 0
+#     },
+#     "created": true
+#   }
+#
+# Elasticsearch DEBUG: 2018-08-21T12:58:49Z
+#   Request complete
+#
+# indexed
 
 #
 # let's clone the gists we just found
