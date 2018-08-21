@@ -195,4 +195,4 @@ ls -lAFh
 # now let's call another shell script to generate the 
 # blocks graph metadata
 #
-#sh update-pipeline-blocks-graph.sh
+sh update-pipeline-blocks-graph.sh
