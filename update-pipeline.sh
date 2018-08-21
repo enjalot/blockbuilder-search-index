@@ -1,8 +1,7 @@
 # here is the log of a d3 blocks metadata update run
 # this log assumes that:
 #
-#  1) we don't have any new github usernames to check
-#  2) we have already updated before, and only need to check since the last update date
+#  1) we have already updated before, and only need to check since the last update date
 #     (which in our case was ~20180120.  we'll get everything since 2018-01-19T00:00:00Z 
 #      to be safe) 
 #
@@ -18,8 +17,8 @@ coffee combine-users.coffee
 # 468 users from blocks links in knight course
 # 2594 users added from bb
 # 200 added from manual list of users
-# 35 users added from blocksplorer
-# 3502 users total
+# 39 users added from blocksplorer
+# 3506 users total
 
 coffee gist-meta.coffee data/new.json '' 'new-users'
 # combining 3147 with 25277 existing blocks
