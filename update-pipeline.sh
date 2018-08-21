@@ -4,6 +4,7 @@
 #  1) we have already updated before, and only need to check since the last update date
 #     (which in our case was ~20180120.  we'll get everything since 2018-01-19T00:00:00Z 
 #      to be safe) 
+#  2) we are not worried about validating that users have at least one
 #
 # note: 
 #   each command shows a sample of what the terminal output 
@@ -20,7 +21,15 @@ coffee combine-users.coffee
 # 39 users added from blocksplorer
 # 3506 users total
 
-coffee gist-meta.coffee data/new.json '' 'new-users'
+#
+# optionally get all blocks for new users 
+# for all time
+#
+# TODO implement bash if else to check if 
+# the file data/new.json exists
+# if yes, run this command. if no, do nothing
+#  
+# coffee gist-meta.coffee data/new.json '' 'new-users'
 # combining 3147 with 25277 existing blocks
 # writing 28336 blocks to data/gist-meta.json
 # writing 3147 to data/new.json
