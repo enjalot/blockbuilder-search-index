@@ -10,7 +10,7 @@
 #   each command shows a sample of what the terminal output 
 #   should look like if command runs successfully
 
-BLOCKBUILDER_SEARCH_INDEX_HOME="~/workspace/blockbuilder-search-index"
+BLOCKBUILDER_SEARCH_INDEX_HOME="/Users/m/workspace/blockbuilder-search-index"
 cd $BLOCKBUILDER_SEARCH_INDEX_HOME
 
 coffee combine-users.coffee
