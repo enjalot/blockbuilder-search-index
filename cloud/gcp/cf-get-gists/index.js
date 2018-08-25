@@ -12,9 +12,18 @@ const async = require('async')
 const conf = require('./config.js');
 const util = require('./util.js');
 
+const Datastore = require('@google-cloud/datastore');
+// Instantiates a client, make sure to get a keyfile and set these parameters
+// dev code:
+const gcpConf = require('../../../config.js').gcp;
+const datastore = Datastore({
+  projectId: gcpConf.projectId,
+  keyFilename: gcpConf.keyFilename,
+  namespace: 'gists'
+});
 
 // TODO: rename to getGists and redeploy (update documentaiton in issues)
-exports.processUsers = function (event, callback) {
+exports.getGists = function (event, callback) {
   const pubsubMessage = event.data;
   console.log("EVENT", event)
   var data = pubsubMessage;
@@ -41,6 +50,40 @@ exports.processUsers = function (event, callback) {
     util.getPages(user, [], 1, since, function(gists) {
       console.log(`done with ${user}, found ${gists.length} gists`);
       gists.forEach(g => newGists.push(g));
+      // upsert the gists into datastore
+      entities = gists.map(function(g) {
+
+        // datastore doesn't like keys that have . in them
+        // so we replace . with |
+        var files = Object.keys(g.files)
+        var gfiles = {}
+        files.forEach(function(f) {
+          gfiles[f.replace(/\./g, '|')] = g.files[f]
+        })
+        g.files = gfiles;
+        // we store the owner login and id on the entity
+        if(g.owner) {
+          g.owner_login = g.owner.login
+          g.owner_id = g.owner.id
+        } else {
+          g.owner_login = anonymous
+          g.owner_id = -1
+        }
+        // remove extra cruft around user
+        delete g.owner;
+        var entity = {
+          key: datastore.key(['gist', g.id]),
+          data: g
+        }
+        return entity
+      })
+      datastore.upsert(entities, (err, result) => {
+        if(err) {
+          console.error(err)
+        } else {
+          console.log(`upserted ${entities.length} entities.`)
+        }
+      })
       return setTimeout(() => userCb()
       , 50);
     })

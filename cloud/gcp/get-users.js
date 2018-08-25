@@ -20,8 +20,9 @@ query.order('created')
 // .offset(1)
 
 datastore.runQuery(query, (error, entities, info) => {
+  console.log("# of users", entities.length)
   entities.forEach(function(d) {
     // console.log("result", d)
-    console.log("json", JSON.stringify(d, null, 2))
+    // console.log("json", JSON.stringify(d, null, 2))
   })
 })
