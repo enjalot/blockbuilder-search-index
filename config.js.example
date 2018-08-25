@@ -3,6 +3,19 @@ module.exports = {
   github: {
     clientId: 'ASDF',
     secret: 'ASDFASDF',
+    // you can create more apps and we will rotate through the
+    // keys when you run out of rate limit in one of them
+    apps: [
+      {
+        clientId: 'ASDF2',
+        secret: 'ASDFASDF2',
+      },
+      {
+        clientId: 'ASDF3',
+        secret: 'ASDFASDF3',
+      }
+      // ... as many as you want
+    ],
     // personal access token for making auth'd clones. don't give this token any permissions, not needed
     token: ''
   },

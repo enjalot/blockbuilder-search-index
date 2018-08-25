@@ -3,28 +3,56 @@ conf = require './config.js'
 
 count = 0
 
+ghCredentialIndex = 0;
+ghClient = conf.github.clientId
+ghSecret = conf.github.secret
+
 ghUrl = (url) ->
   options = {
     url: url,
     qs: {
-      'client_id': conf.github.clientId,
-      'client_secret': conf.github.secret
+      'client_id': ghClient
+      'client_secret': ghSecret 
     },
     headers: {
-      'User-Agent': 'Block-Scan'
+      'User-Agent': 'Block-Scan' + ghCredentialIndex
     }
   };
   return options;
 
+# wrap the users callback in a function that lets us
+# change the github client id on the fly if we run out of rate limit
+rateLimitRotate = (url, cb) ->
+  return (err, response, body) ->
+    remaining = response?.headers['x-ratelimit-remaining'] || 0
+    console.log "rate limit remaining", remaining
+    if remaining <= 1 && conf.github.apps && (ghCredentialIndex < conf.github.apps.length - 1)
+      ghCredentialIndex += 1
+      console.log "switching apps", ghCredentialIndex
+      ghClient = conf.github.apps[ghCredentialIndex].clientId
+      ghSecret = conf.github.apps[ghCredentialIndex].secret
+      if remaining < 1
+        #resubmit the request
+        gurl = ghUrl(url.url)
+        console.log("resubmitting", gurl)
+        return request.get(url, cb)
+
+    # otherwise callback with the response
+    cb(err, response, body)
+
 getUser = (username, cb) ->
   count++
   url = "https://api.github.com/users/" + username
-  request.get(ghUrl(url), cb);
+  gurl = ghUrl(url)
+  # request.get(ghUrl(url), cb);
+  request.get(gurl, rateLimitRotate(gurl, cb))
 
 getGist = (gistId, cb) ->
   count++
   url = "https://api.github.com/gists/" + gistId
-  request.get(ghUrl(url), cb);
+  gurl = ghUrl(url)
+  # request.get(ghUrl(url), cb);
+  request.get(gurl, rateLimitRotate(gurl, cb))
 
 getUsersGists = (username, page, since, cb) ->
   count++
@@ -40,6 +68,14 @@ getUsersGists = (username, page, since, cb) ->
     cb err, response, body
   #console.log("request count", count)
 
+checkRateLimit = () ->
+  cb = (err, response, body) ->
+    console.log(body)
+  url = ghUrl("https://api.github.com/rate_limit")
+  # request.get(url, cb)
+  request.get(url, rateLimitRotate(url, cb))
+
 module.exports = {
-  ghUrl, getUser, getGist, getUsersGists, count
+  ghUrl, getUser, getGist, getUsersGists, count, checkRateLimit
 }
+
