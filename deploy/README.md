@@ -6,15 +6,15 @@ To install the service (which makes sure the server stays running, even after a 
 in `/etc/systemd/system/elasticsearch-indexer.service`  
 
 ```bash
-systemctl start elasticsearch-indexer
-systemctl stop elasticsearch-indexer
-systemctl status elasticsearch-indexer
+sudo systemctl start elasticsearch-indexer
+sudo systemctl stop elasticsearch-indexer
+sudo systemctl status elasticsearch-indexer
 ```
 
 If you want to start it on boot:
 
 ```bash
-systemctl enable elasticsearch-indexer
+sudo systemctl enable elasticsearch-indexer
 ```
 
 Checking the logs
