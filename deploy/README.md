@@ -1,7 +1,27 @@
 # Deploy scripts
 
+## elasticsearch
+Newer ubuntu uses systemd rather than upstart. For our recent deployment to Ubuntu 16.04 we will use `elasticsearch.service` with systemd.
+To install the service (which makes sure the server stays running, even after a reboot) put `elasticsearch.service`
+in `/etc/systemd/system/elasticsearch.service`  
+
+```bash
+sudo systemctl start elasticsearch
+sudo systemctl stop elasticsearch
+sudo systemctl status elasticsearch
+```
+
+If you want to start it on boot:
+
+```bash
+sudo systemctl enable elasticsearch
+```
+
+
 ## elasticsearch-indexer
-Newer ubuntu uses systemd rather than upstart. For our recent deployment to Ubuntu 16.04 we will use `elasticsearch-indexer.service` with systemd.
+Elasticsearch-indexer is a RPC server which receives requests from blockbuilder-search to index and delete individual gists.
+
+We will use `elasticsearch-indexer.service` with systemd.
 To install the service (which makes sure the server stays running, even after a reboot) put `elasticsearch-indexer.service`
 in `/etc/systemd/system/elasticsearch-indexer.service`  
 
