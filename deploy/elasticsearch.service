@@ -8,7 +8,7 @@ RestartSec=10                       # Restart service after 10 seconds if node s
 StandardOutput=syslog               # Output to syslog
 StandardError=syslog                # Output to syslog
 SyslogIdentifier=elasticsearch-server
-#User=ubuntu
+User=ubuntu
 #Group=<alternate group>
 Environment=DISPLAY=:99
 
