@@ -1,0 +1,17 @@
+[Unit]
+Description=Elasticsearch
+
+[Service]
+ExecStart=/home/ubuntu/elasticsearch-6.4.0/bin/elasticsesarch
+Restart=always
+RestartSec=10                       # Restart service after 10 seconds if node service crashes
+StandardOutput=syslog               # Output to syslog
+StandardError=syslog                # Output to syslog
+SyslogIdentifier=elasticsearch-server
+#User=ubuntu
+#Group=<alternate group>
+Environment=DISPLAY=:99
+
+
+[Install]
+WantedBy=multi-user.target
