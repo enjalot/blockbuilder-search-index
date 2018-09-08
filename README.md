@@ -1,18 +1,20 @@
 ## Download and parse blocks for search
+
 This repo is a combination of utility scripts and services that support the continuous scraping and indexing
 of public blocks. It powers [Blockbuilder](http://blockbuilder.org)'s [search page](http://blockbuilder.org/search).
 
-[Blocks](https://bl.ocks.org) are stored as GitHub [gists](https://gist.github.com), which are essentially mini git repositories. If a gist has an `index.html` file, d3 example viewers like [blockbuilder.org](blockbuilder.org) or [bl.ocks.org](bl.ocks.org) will render the page contained in the gist.  Given a list of users we can query the [GitHub API](https://developer.github.com/v3/gists/) for the latest public gists that each of those users has updated or created.
+[Blocks](https://bl.ocks.org) are stored as GitHub [gists](https://gist.github.com), which are essentially mini git repositories. If a gist has an `index.html` file, d3 example viewers like [blockbuilder.org](blockbuilder.org) or [bl.ocks.org](bl.ocks.org) will render the page contained in the gist. Given a list of users we can query the [GitHub API](https://developer.github.com/v3/gists/) for the latest public gists that each of those users has updated or created.
 We can then filter those gists to see only those gists which have an `index.html` file.
 
 Once we have a list of gists
-from the API we can download the files from each gist to disk for further processing. Then, we want to index some of those files in [Elasticsearch](https://www.elastic.co/products/elasticsearch).  This allows us to run our own search engine for the files inside of gists that we are interested in.
+from the API we can download the files from each gist to disk for further processing. Then, we want to index some of those files in [Elasticsearch](https://www.elastic.co/products/elasticsearch). This allows us to run our own search engine for the files inside of gists that we are interested in.
 
 We also have a script that will output several `.json` files that can be used to create visualizations such as [all the blocks](http://bl.ocks.org/enjalot/1d679f0322174b65d032) and the ones described in [this post](https://medium.com/@enjalot/searching-for-examples-2c0f75709c1a#.4fr5vuq7k).
 
-##  Setup
+## Setup
 
 ### Config.js
+
 First create a `config.js` file. You can copy [`config.js.example`](config.js.example) and replace the placeholders tokens with a valid GitHub [application token](https://github.com/settings/applications/new). This token is important because it frees you from GitHub API rate limits you would encounter running these scripts without a token.
 
 `config.js` is also the place to configure [Elasticsearch](https://www.elastic.co/products/elasticsearch) and the [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) server, if you plan to run them.
@@ -56,8 +58,8 @@ coffee gist-meta.coffee data/new.json '' 'new-users'
 [`data/gist-meta.json`](data/gist-meta.json) serves as a running index of blocks we have downloaded. Any time you run the `gist-meta.coffee` command, any new blocks found will be added to `gist-meta.json`. In our production deployment, [cronjobs](https://en.wikipedia.org/wiki/Cron) will create [`data/latest.json`](data/latest.json) every 15 minutes. Later in the pipeline, we use [`data/latest.json`](data/latest.json) to index the gists in [Elasticsearch](https://www.elastic.co/products/elasticsearch).
 You can download a recent copy to bootstrap your index here: [`gist-meta.json`](https://storage.googleapis.com/bb-search-data/gist-meta.json)
 
-
 ### Gist clones
+
 The second step in the process is to download the contents of each gist via a GitHub [raw urls](http://stackoverflow.com/a/4605068/1732222) and save the files to disk in `data/gists-clones/`.
 The gists for each user are cloned into a folder with their username.
 
@@ -71,6 +73,7 @@ coffee gist-cloner.coffee data/latest.json
 ```
 
 ### Gist content (deprecated)
+
 <details>
   <summary>deprecated instructions</summary>
 Previously, the second step in the process was to download the contents of each gist via a GitHub [raw urls](http://stackoverflow.com/a/4605068/1732222) and save the files to disk in `data/gists-files/`.
@@ -83,7 +86,7 @@ We selectively download files of certain types
 if ext in [".html", ".js", ".coffee", ".md", ".json", ".csv", ".tsv", ".css"]
 ```
 
-This filter-by-file-extension selective download approach consumes 60% less disk space than naively cloning all of the gists.  
+This filter-by-file-extension selective download approach consumes 60% less disk space than naively cloning all of the gists.
 
 ```shell
 # default, will download all the files found in data/gist-meta.json
@@ -93,10 +96,12 @@ coffee gist-content.coffee data/latest.json
 # skip existing files (saves time, might miss updates)
 coffee gist-content.coffee data/gist-meta.json skip
 ```
+
 </details>
 
 ### Flat data files
-We can generate a series of JSON files that pull out interesting metadata from the downloaded gists.  
+
+We can generate a series of JSON files that pull out interesting metadata from the downloaded gists.
 
 ```shell
 coffee parse.coffee
@@ -110,7 +115,7 @@ While big, both of these directory sizes are manageable. The advantage of clonin
 
 ### Custom gallery JSON
 
-I wanted a script that would take in a list of block URLS and give me a subset of the `blocks.json` formatted data. It currently depends on the blocks being part of the list, so anonymous blocks won't work right now.  
+I wanted a script that would take in a list of block URLS and give me a subset of the `blocks.json` formatted data. It currently depends on the blocks being part of the list, so anonymous blocks won't work right now.
 
 ```shell
 coffee gallery.coffee data/unconf.csv data/out.json
@@ -118,9 +123,9 @@ coffee gallery.coffee data/unconf.csv data/out.json
 
 ## Setup Elasticsearch & Index some Gists
 
-Once you have a list of gists (either [`data/gist-meta.json`](data/gist-meta.json), `data/latest.json` or otherwise) and you've downloaded the content to `data/gist-files/` you can index the gists to Elasticsearch: 
+Once you have a list of gists (either [`data/gist-meta.json`](data/gist-meta.json), `data/latest.json` or otherwise) and you've downloaded the content to `data/gist-files/` you can index the gists to Elasticsearch:
 
-download [Elasticsearch 2.3.4](https://www.elastic.co/downloads/past-releases/elasticsearch-2-3-4) 
+download [Elasticsearch 2.3.4](https://www.elastic.co/downloads/past-releases/elasticsearch-2-3-4)
 
 unzip `elasticsearch-2.3.4.zip` and run a local Elasticsearch instance:
 
@@ -145,15 +150,16 @@ cd blockbuilder-search-index
 # index from a specific file
 coffee elasticsearch.coffee data/latest.json
 ```
-if you see a `JavaScript heap out of memory` errror, then the `nodejs` process invoked by Coffeescript ran out of memory.  to fix this error and index all of the blocks in one go, increase the amount of memory available to `nodejs`
 
-with the argument `--nodejs --max-old-space-size=8000`
+if you see a `JavaScript heap out of memory` errror, then the `nodejs` process invoked by Coffeescript ran out of memory. to fix this error and index all of the blocks in one go, increase the amount of memory available to `nodejs`
+
+with the argument `--nodejs --max-old-space-size=12000`
 
 if we use this argument, then the whole command becomes:
 
 ```
 cd blockbuilder-search-index
-coffee --nodejs --max-old-space-size=8000 elasticsearch.coffee
+coffee --nodejs --max-old-space-size=12000 elasticsearch.coffee
 ```
 
 ### Deployment
@@ -166,7 +172,7 @@ I made a very simple REST server that will listen for incoming gists to index th
 This is used to keep the index immediately up-to-date when a user saves or forks a gist from [blockbuilder.org](http://blockbuilder.org).
 Currently the save/fork functionality will index if it sees that the gist is public, and it will delete if it sees that the gist is private. This way if you make a previously public gist private and update it via blockbuilder it will be removed from the search index.
 
-I deploy the RPC host to the same server as [Elasticsearch](https://www.elastic.co/products/elasticsearch), and have security groups setup so that its not publicly accessible (only my blockbuilder server can access it)  
+I deploy the RPC host to the same server as [Elasticsearch](https://www.elastic.co/products/elasticsearch), and have security groups setup so that its not publicly accessible (only my blockbuilder server can access it)
 
 ```
 node server.js
