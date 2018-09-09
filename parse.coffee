@@ -320,7 +320,7 @@ gistParser = (gist, gistCb) ->
   glibHash = {}
   gmoduleHash = {}
   gcolorHash = {}
-  folder = __dirname + "/" + "data/gists-clones/" + gist.id
+  folder = __dirname + "/data/gists-clones/#{gist.owner.login}/#{gist.id}"
   fs.mkdir folder, ->
 
   # we make a simplified data object for each file
