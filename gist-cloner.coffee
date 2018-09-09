@@ -55,7 +55,7 @@ gistCloner = (gist, gistCb) ->
 
   userfolder = base + user
   folder = userfolder + '/' + gist.id
-  fs.mkdir userfolder, ->
+  fs.mkdirSync userfolder
 
   #shell.cd(userfolder)
   # TODO don't use token in clone url (git init; git pull with token)
