@@ -246,6 +246,7 @@ parseScriptTags = (code) ->
   while match != null
     matches.push match[1]
     match = re.exec(code)
+  # console.log("script matches", matches)
   return matches
 
 parseLibs = (code, gist, glibHash) ->

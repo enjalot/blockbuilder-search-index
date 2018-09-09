@@ -152,7 +152,6 @@ gistParser = (gist, gistCb) ->
     return gistCb() if (gist.description and gist.description.indexOf("[UNLISTED]") >= 0 )
 
     es = pruneES(gist)
-
     
     #console.log "ES", JSON.stringify(es)
 
