@@ -99,9 +99,6 @@ done = (err) ->
   console.log "wrote #{fileBlocks.length} Files blocks"
   console.log "wrote #{allBlocks.length} total blocks"
 
-# read in the list of gist metadata
-gistMeta = JSON.parse fs.readFileSync(__dirname + '/data/gist-meta.json').toString()
-console.log gistMeta.length
 
 
 pruneMin = (gist) ->
@@ -370,4 +367,9 @@ gistParser = (gist, gistCb) ->
 module.exports = { api: parseApi, colors: parseColors, colorScales, d3version: parseD3Version, d3modules: parseD3Modules }
 
 if require.main == module
+  # read in the list of gist metadata
+  gistMeta = JSON.parse fs.readFileSync(__dirname + '/data/gist-meta.json').toString()
+  console.log gistMeta.length
+
   async.eachLimit gistMeta, 100, gistParser, done
+
