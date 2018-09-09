@@ -84,13 +84,21 @@ done = (err) ->
   fs.writeFileSync "data/parsed/files-blocks.json", JSON.stringify(fileBlocks)
 
   libcsv = "url,count\n"
+  libs = []
   Object.keys(libHash).forEach (lib) ->
-    libcsv += lib + "," + libHash[lib] + "\n"
+    libs.push( { lib: lib, count: libHash[lib] })
+  libs.sort (a,b) -> return b.count - a.count
+  libs.forEach (l) ->
+    libcsv += l.lib + "," + l.count + "\n"
   fs.writeFileSync("data/parsed/libs.csv", libcsv)
 
   modulescsv = "module,count\n"
-  Object.keys(moduleHash).forEach (module) ->
-    modulescsv += module + "," + moduleHash[module] + "\n"
+  modules = []
+  Object.keys(moduleHash).forEach (m) ->
+    modules.push( {module: m, count: moduleHash[m] })
+  modules.sort (a,b) -> return b.count - a.count
+  modules.forEach (m) ->
+    modulescsv += m.module + "," + m.count + "\n"
   fs.writeFileSync("data/parsed/modules.csv", modulescsv)
 
   console.log "err", err if err
@@ -250,9 +258,9 @@ parseLibs = (code, gist, glibHash) ->
   scripts = parseScriptTags(code)
   scripts.forEach (script) ->
     #console.log script
-    #libHash[script] = 0 unless libHash[script]
-    #libHash[script]++
-  return 0
+    libHash[script] = 0 unless libHash[script]
+    libHash[script]++
+  return scripts.length
 
 parseD3Version = (code) ->
   scripts = parseScriptTags(code)
@@ -293,7 +301,15 @@ parseD3Modules = (code, gmoduleHash) ->
   return 0
 
 
+localToGlobal = (loc, glo) ->
+  Object.keys(loc).forEach (key) ->
+    glo[key] = 0 unless glo[key]
+    glo[key] += loc[key] or 0
+
 i = 0
+# WARNING this function should not be exported
+# it's intended to collect metadata about all the blocks we know of
+# see elasticsearch.coffee for a version of the function that has no side-effects
 gistParser = (gist, gistCb) ->
   #console.log "NOT RETURNING", gist.id, singleId
   i++
@@ -346,11 +362,14 @@ gistParser = (gist, gistCb) ->
   , () ->
     if Object.keys(gapiHash).length > 0
       gist.api = gapiHash
+      localToGlobal(gapiHash, apiHash)
       apiBlocks.push pruneApi(gist)
     if Object.keys(gmoduleHash).length > 0
       gist.d3modules = gmoduleHash
+      localToGlobal(gmoduleHash, moduleHash)
     if Object.keys(gcolorHash).length > 0
       gist.colors = gcolorHash
+      localToGlobal(gcolorHash, colorHash)
       colorBlocks.push pruneColors(gist)
       colorBlocksMin.push pruneColorsMin(gist)
     # if Object.keys(glibHash).length > 0
