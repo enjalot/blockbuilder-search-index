@@ -266,7 +266,9 @@ parseD3Version = (code) ->
   scripts = parseScriptTags(code)
   version = "NA"
   scripts.forEach (script) ->
-    if script.indexOf("d3.v4") >= 0
+    if script.indexOf("d3.v5") >= 0
+      version = "v5"
+    else if script.indexOf("d3.v4") >= 0
       version = "v4"
     else if script.indexOf("d3/3.") >= 0 or script.indexOf("d3.v3") >= 0
       version = "v3"
