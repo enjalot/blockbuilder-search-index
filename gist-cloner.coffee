@@ -5,6 +5,7 @@ async = require 'async'
 request = require 'request'
 path = require 'path'
 shell = require 'shelljs'
+os = require 'os'
 
 # we will log our progress in ES
 elasticsearch = require('elasticsearch')
@@ -14,6 +15,9 @@ client = new elasticsearch.Client esConfig
 
 base = __dirname + "/data/gists-clones/"
 timeouts = []
+
+winshellCheck = (cmd) ->
+    return if os.platform() == 'win32' then cmd.replace(';','&') else cmd
 
 done = (err, pruned) ->
   console.log "done writing files"
@@ -69,6 +73,7 @@ gistCloner = (gist, gistCb) ->
       console.log "already got", gist.id
       # we want to be able to pull recently modified gists
       cmd = "cd #{userfolder}/#{gist.id}; git pull origin master"
+      cmd = winshellCheck(cmd)
       shell.exec cmd, (code, huh, message) ->
         if code or message
           console.log gist.id, user, code, message
@@ -82,7 +87,7 @@ gistCloner = (gist, gistCb) ->
         cmd = "cd #{userfolder};git clone https://#{token}@gist.github.com/#{gist.id}"
       else
         cmd = "cd #{userfolder};git clone git@gist.github.com:#{gist.id}"
-
+      cmd = winshellCheck(cmd)
       shell.exec cmd, (code, huh, message) ->
         if code or message
           console.log gist.id, user, code, message
